@@ -77,16 +77,16 @@ function TemplatesPage() {
     toast.success("New template created");
   };
 
-  const handleImport = (name: string, html: string) => {
+  const handleConvert = (r: { name: string; category: string; html: string }) => {
     const id = `tpl-${Date.now()}`;
     const tpl: Template = {
-      id, name, category: "HR",
-      description: "Imported template — refine tokens.",
+      id, name: r.name, category: r.category,
+      description: "Converted from legacy document.",
       updated: new Date().toLocaleDateString(),
       author: "You", uses: 0, starred: false, version: "v0.1",
     };
     setTemplates((s) => [tpl, ...s]);
-    setTemplateContent(id, html);
+    setTemplateContent(id, r.html);
     setSelectedId(id);
   };
 
@@ -101,7 +101,7 @@ function TemplatesPage() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setImportOpen(true)} className="gap-2">
-            <Upload className="h-4 w-4" /> Import .docx
+            <Wand2 className="h-4 w-4" /> Convert legacy template
           </Button>
           <Button onClick={createBlank} className="gap-2">
             <Plus className="h-4 w-4" /> New template
