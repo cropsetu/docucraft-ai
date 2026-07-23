@@ -51,12 +51,38 @@ export const Route = createFileRoute("/_app/projects/$id")({
   component: ProjectDetail,
 });
 
+const STAGES = [
+  { key: "template", n: 1, title: "Template", short: "Blueprint", icon: UploadCloud, hint: "Define the document structure" },
+  { key: "source", n: 2, title: "Sources", short: "Inputs", icon: FolderTree, hint: "Bring in the raw content" },
+  { key: "method", n: 3, title: "Method", short: "Engine", icon: Sparkles, hint: "Choose how to generate" },
+  { key: "mapping", n: 4, title: "Mapping", short: "Link", icon: Network, hint: "Connect sources to sections" },
+  { key: "drafts", n: 5, title: "Drafts", short: "Output", icon: FileText, hint: "Review generated documents" },
+] as const;
+
+type StageKey = typeof STAGES[number]["key"];
+
 function ProjectDetail() {
   const { id } = Route.useParams();
   const project = useStore((s) => s.projects.find((p) => p.id === id))!;
 
+  const done: Record<StageKey, boolean> = {
+    template: project.templates.length > 0,
+    source: project.sources.length > 0,
+    method: !!project.generationMethod,
+    mapping: project.drafts.length > 0,
+    drafts: project.generated.length > 0,
+  };
+
+  const firstIncomplete = (STAGES.find((s) => !done[s.key])?.key ?? "drafts") as StageKey;
+  const [active, setActive] = useState<StageKey>(firstIncomplete);
+
+  const activeIdx = STAGES.findIndex((s) => s.key === active);
+  const activeStage = STAGES[activeIdx];
+  const completedCount = Object.values(done).filter(Boolean).length;
+  const progressPct = (completedCount / STAGES.length) * 100;
+
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-6">
+    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
       {/* Breadcrumb */}
       <div className="text-sm text-muted-foreground flex items-center gap-2">
         <Link to="/dashboard" className="hover:text-foreground">Projects</Link>
@@ -64,120 +90,145 @@ function ProjectDetail() {
         <span className="text-foreground">{project.name}</span>
       </div>
 
-      {/* Title */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{project.name}</h1>
-          {project.description && (
-            <p className="text-muted-foreground mt-1">{project.description}</p>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <button className="h-9 px-3 rounded-lg border border-border bg-surface hover:bg-accent text-sm inline-flex items-center gap-1.5">
-            <Share2 className="h-4 w-4" /> Share
-          </button>
-          <button className="h-9 w-9 rounded-lg border border-border bg-surface hover:bg-accent flex items-center justify-center">
-            <MoreVertical className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Metadata card */}
-      <div className="rounded-xl border border-border bg-surface p-6 grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
-        <Meta label="Project ID" value={project.projectId} mono />
-        <Meta label="Region" value={project.region} />
-        <Meta label="Function" value={project.function} />
-        <Meta label="Document Type" value={project.documentType} />
-        <Meta label="Created on" value={project.createdAt} />
-      </div>
-
-      {/* Section header */}
-      <div className="flex items-center justify-between pt-4">
-        <h2 className="text-xl font-semibold">Document generation process</h2>
-        <div className="flex items-center gap-1 rounded-lg border border-border bg-surface p-1">
-          <button className="p-1.5 rounded bg-accent text-foreground">
-            <Layout className="h-4 w-4" />
-          </button>
-          <button className="p-1.5 rounded text-muted-foreground hover:text-foreground">
-            <LayoutGrid className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Steps */}
-      <Step1Template project={project} />
-      <Step2Source project={project} />
-      <Step3Method project={project} />
-      <Step4Drafts project={project} />
-      <Step5Generated project={project} />
-    </div>
-  );
-}
-
-function Meta({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <div>
-      <div className="text-xs text-muted-foreground uppercase tracking-wide">{label}</div>
-      <div className={cn("mt-1 font-medium", mono && "font-mono text-sm")}>{value}</div>
-    </div>
-  );
-}
-
-/* ------------------ Step wrapper ------------------ */
-function StepCard({
-  n,
-  title,
-  count,
-  description,
-  icon: Icon,
-  iconColor,
-  status,
-  defaultOpen,
-  children,
-}: {
-  n: number;
-  title: string;
-  count: number;
-  description: string;
-  icon: any;
-  iconColor: string;
-  status: "Pending" | "Completed" | "In Progress";
-  defaultOpen?: boolean;
-  children: React.ReactNode;
-}) {
-  const [open, setOpen] = useState(defaultOpen ?? false);
-  const statusStyles = {
-    Pending: "bg-warning/15 text-warning border-warning/30",
-    Completed: "bg-success/15 text-success border-success/30",
-    "In Progress": "bg-info/15 text-info border-info/30",
-  };
-  return (
-    <div className="rounded-xl border border-border bg-surface overflow-hidden">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center gap-4 p-5 hover:bg-accent/30 transition-colors text-left"
-      >
-        <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center", iconColor)}>
-          <Icon className="h-5 w-5" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold">
-              {n}. {title}
-            </span>
-            <span className="text-sm text-muted-foreground">({count})</span>
-            <span className="text-muted-foreground">|</span>
-            <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium", statusStyles[status])}>
-              {status}
-            </span>
+      {/* Title + meta strip */}
+      <div className="rounded-2xl border border-border bg-surface overflow-hidden">
+        <div className="p-6 flex items-start justify-between gap-4 flex-wrap">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand" />
+              {project.projectId} · {project.region} · {project.function}
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight mt-1.5">{project.name}</h1>
+            {project.description && (
+              <p className="text-sm text-muted-foreground mt-1 max-w-2xl">{project.description}</p>
+            )}
           </div>
-          <div className="text-sm text-muted-foreground mt-1">{description}</div>
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="text-right pr-3 border-r border-border">
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Progress</div>
+              <div className="text-sm font-semibold">{completedCount}/{STAGES.length} stages</div>
+            </div>
+            <button className="h-9 px-3 rounded-lg border border-border bg-surface hover:bg-accent text-sm inline-flex items-center gap-1.5">
+              <Share2 className="h-4 w-4" /> Share
+            </button>
+            <button className="h-9 w-9 rounded-lg border border-border bg-surface hover:bg-accent flex items-center justify-center">
+              <MoreVertical className="h-4 w-4" />
+            </button>
+          </div>
         </div>
-        <ChevronDown className={cn("h-5 w-5 text-muted-foreground transition-transform", open && "rotate-180")} />
-      </button>
-      {open && <div className="border-t border-border p-6">{children}</div>}
+        {/* Progress bar */}
+        <div className="h-1 bg-muted">
+          <div className="h-full bg-gradient-brand transition-all" style={{ width: `${progressPct}%` }} />
+        </div>
+      </div>
+
+      {/* Pipeline rail */}
+      <PipelineRail stages={STAGES} done={done} active={active} onSelect={setActive} />
+
+      {/* Active stage panel */}
+      <div className="rounded-2xl border border-border bg-surface">
+        <div className="flex items-center gap-4 p-6 border-b border-border">
+          <div className={cn(
+            "h-11 w-11 rounded-xl flex items-center justify-center border",
+            done[active] ? "bg-success/10 text-success border-success/30" : "bg-brand/10 text-brand border-brand/30",
+          )}>
+            <activeStage.icon className="h-5 w-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-mono">Stage {activeStage.n} of {STAGES.length}</div>
+            <div className="text-lg font-semibold">{activeStage.title}</div>
+            <div className="text-sm text-muted-foreground">{activeStage.hint}</div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              disabled={activeIdx === 0}
+              onClick={() => setActive(STAGES[activeIdx - 1].key)}
+              className="h-9 px-3 rounded-lg border border-border hover:bg-accent text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            <button
+              disabled={activeIdx === STAGES.length - 1}
+              onClick={() => setActive(STAGES[activeIdx + 1].key)}
+              className="h-9 px-3 rounded-lg bg-gradient-brand text-white text-sm inline-flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Next stage <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+        <div className="p-6">
+          {active === "template" && <Step1Template project={project} />}
+          {active === "source" && <Step2Source project={project} />}
+          {active === "method" && <Step3Method project={project} />}
+          {active === "mapping" && <Step4Drafts project={project} />}
+          {active === "drafts" && <Step5Generated project={project} />}
+        </div>
+      </div>
     </div>
   );
+}
+
+function PipelineRail({
+  stages,
+  done,
+  active,
+  onSelect,
+}: {
+  stages: typeof STAGES;
+  done: Record<StageKey, boolean>;
+  active: StageKey;
+  onSelect: (k: StageKey) => void;
+}) {
+  return (
+    <div className="rounded-2xl border border-border bg-surface p-4">
+      <div className="grid grid-cols-5 gap-3 relative">
+        {stages.map((s, i) => {
+          const isActive = active === s.key;
+          const isDone = done[s.key];
+          return (
+            <div key={s.key} className="relative">
+              {/* Connector line */}
+              {i < stages.length - 1 && (
+                <div className={cn(
+                  "hidden md:block absolute top-5 left-[calc(50%+22px)] right-[-12px] h-px",
+                  done[stages[i + 1].key] || (isDone && !done[stages[i + 1].key]) ? "bg-brand/60" : "bg-border",
+                )} />
+              )}
+              <button
+                onClick={() => onSelect(s.key)}
+                className="w-full flex flex-col items-center text-center gap-2 group"
+              >
+                <div className={cn(
+                  "h-10 w-10 rounded-full flex items-center justify-center border-2 font-mono text-sm font-semibold transition-all relative z-10",
+                  isActive
+                    ? "bg-gradient-brand text-white border-transparent shadow-lg shadow-brand/30 scale-110"
+                    : isDone
+                    ? "bg-success/10 text-success border-success/40"
+                    : "bg-background text-muted-foreground border-border group-hover:border-border-strong group-hover:text-foreground",
+                )}>
+                  {isDone && !isActive ? <Check className="h-4 w-4" /> : s.n}
+                </div>
+                <div className="min-w-0">
+                  <div className={cn(
+                    "text-sm font-semibold truncate",
+                    isActive ? "text-foreground" : isDone ? "text-foreground" : "text-muted-foreground",
+                  )}>{s.title}</div>
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono truncate">
+                    {isDone ? "Complete" : isActive ? "Current" : s.short}
+                  </div>
+                </div>
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* legacy StepCard removed — content now renders directly inside stage panel */
+function StepBody({ children }: { children: React.ReactNode }) {
+  return <div>{children}</div>;
 }
 
 /* ------------------ Step 1 ------------------ */
