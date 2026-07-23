@@ -197,7 +197,7 @@ function TemplatesPage() {
         </div>
       </div>
 
-      <TemplateImportDialog open={importOpen} onOpenChange={setImportOpen} onImport={handleImport} />
+      <TemplateConversionWizard open={importOpen} onOpenChange={setImportOpen} onFinish={handleConvert} />
     </div>
   );
 }
