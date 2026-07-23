@@ -226,9 +226,9 @@ function PipelineRail({
   );
 }
 
-/* legacy StepCard removed — content now renders directly inside stage panel */
-function StepBody({ children }: { children: React.ReactNode }) {
-  return <div>{children}</div>;
+/* Compatibility shim: renders children only (header lives in the stage panel now). */
+function StepCard({ children }: { n?: number; title?: string; count?: number; description?: string; icon?: any; iconColor?: string; status?: string; defaultOpen?: boolean; children: React.ReactNode }) {
+  return <div className="space-y-4">{children}</div>;
 }
 
 /* ------------------ Step 1 ------------------ */
