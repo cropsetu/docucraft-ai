@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { FileText, Search, Plus, Star, Upload, Braces, Sparkles, GitBranch, Repeat } from "lucide-react";
+import { FileText, Search, Plus, Star, Wand2, Braces, Sparkles, GitBranch, Repeat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { TemplateEditor, DEFAULT_TEMPLATE_HTML } from "@/components/template-editor";
-import { TemplateImportDialog } from "@/components/template-import-dialog";
+import { TemplateConversionWizard } from "@/components/template-conversion-wizard";
 import { useStore } from "@/lib/store";
 import { toast } from "sonner";
 
