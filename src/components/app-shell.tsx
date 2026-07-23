@@ -37,6 +37,7 @@ const NAV = [
 export function AppShell({ children }: { children: ReactNode }) {
   const location = useLocation();
   const user = useStore((s) => s.currentUser);
+  const { theme, toggle } = useTheme();
 
   // Desktop: collapsed rail vs expanded. Persist preference.
   const [collapsed, setCollapsed] = useState<boolean>(() => {
