@@ -527,7 +527,14 @@ function Step5Generated({ project }: { project: any }) {
               </div>
               <button className="p-1.5 rounded hover:bg-accent text-muted-foreground" title="Preview"><Eye className="h-4 w-4" /></button>
               <button className="p-1.5 rounded hover:bg-accent text-muted-foreground" title="Download"><Download className="h-4 w-4" /></button>
-              <button className="p-1.5 rounded hover:bg-accent text-muted-foreground" title="Edit"><Pencil className="h-4 w-4" /></button>
+              <Link
+                to="/projects/$id/edit/$docId"
+                params={{ id: project.id, docId: g.id }}
+                className="p-1.5 rounded hover:bg-accent text-muted-foreground"
+                title="Edit"
+              >
+                <Pencil className="h-4 w-4" />
+              </Link>
               <button className="p-1.5 rounded hover:bg-accent text-muted-foreground" title="Regenerate"><RefreshCcw className="h-4 w-4" /></button>
             </div>
           ))}
