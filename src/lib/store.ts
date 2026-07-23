@@ -75,6 +75,7 @@ interface Store {
   totalCount: number;
   docContent: Record<string, string>;
   docApproved: Record<string, boolean>;
+  templateContent: Record<string, string>;
   createProject: (input: CreateProjectInput) => string;
   getProject: (id: string) => Project | undefined;
   addTemplate: (projectId: string, name: string) => void;
@@ -84,6 +85,7 @@ interface Store {
   addGenerated: (projectId: string, filename: string, fromDraft: string) => void;
   setDocContent: (docId: string, html: string) => void;
   approveDoc: (docId: string, approved: boolean) => void;
+  setTemplateContent: (templateId: string, html: string) => void;
 }
 
 let counter = 51363;
@@ -94,6 +96,7 @@ export const useStore = create<Store>((set, get) => ({
   totalCount: 1250,
   docContent: {},
   docApproved: {},
+  templateContent: {},
   createProject: (input) => {
     const id = String(counter++);
     const created: Project = {
@@ -213,6 +216,8 @@ export const useStore = create<Store>((set, get) => ({
     set((s) => ({ docContent: { ...s.docContent, [docId]: html } })),
   approveDoc: (docId, approved) =>
     set((s) => ({ docApproved: { ...s.docApproved, [docId]: approved } })),
+  setTemplateContent: (templateId, html) =>
+    set((s) => ({ templateContent: { ...s.templateContent, [templateId]: html } })),
 }));
 
 export const FUNCTIONS: FunctionKey[] = [
