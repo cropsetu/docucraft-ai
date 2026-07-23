@@ -20,6 +20,7 @@ import { Route as AppAuditLogRouteImport } from './routes/_app.audit-log'
 import { Route as AppAnalyticsRouteImport } from './routes/_app.analytics'
 import { Route as AppProjectsIdRouteImport } from './routes/_app.projects.$id'
 import { Route as AppProjectsIdMappingDraftIdRouteImport } from './routes/_app.projects.$id.mapping.$draftId'
+import { Route as AppProjectsIdEditDocIdRouteImport } from './routes/_app.projects.$id.edit.$docId'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -76,6 +77,11 @@ const AppProjectsIdMappingDraftIdRoute =
     path: '/mapping/$draftId',
     getParentRoute: () => AppProjectsIdRoute,
   } as any)
+const AppProjectsIdEditDocIdRoute = AppProjectsIdEditDocIdRouteImport.update({
+  id: '/edit/$docId',
+  path: '/edit/$docId',
+  getParentRoute: () => AppProjectsIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/team': typeof AppTeamRoute
   '/templates': typeof AppTemplatesRoute
   '/projects/$id': typeof AppProjectsIdRouteWithChildren
+  '/projects/$id/edit/$docId': typeof AppProjectsIdEditDocIdRoute
   '/projects/$id/mapping/$draftId': typeof AppProjectsIdMappingDraftIdRoute
 }
 export interface FileRoutesByTo {
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/team': typeof AppTeamRoute
   '/templates': typeof AppTemplatesRoute
   '/projects/$id': typeof AppProjectsIdRouteWithChildren
+  '/projects/$id/edit/$docId': typeof AppProjectsIdEditDocIdRoute
   '/projects/$id/mapping/$draftId': typeof AppProjectsIdMappingDraftIdRoute
 }
 export interface FileRoutesById {
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/_app/team': typeof AppTeamRoute
   '/_app/templates': typeof AppTemplatesRoute
   '/_app/projects/$id': typeof AppProjectsIdRouteWithChildren
+  '/_app/projects/$id/edit/$docId': typeof AppProjectsIdEditDocIdRoute
   '/_app/projects/$id/mapping/$draftId': typeof AppProjectsIdMappingDraftIdRoute
 }
 export interface FileRouteTypes {
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/team'
     | '/templates'
     | '/projects/$id'
+    | '/projects/$id/edit/$docId'
     | '/projects/$id/mapping/$draftId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/team'
     | '/templates'
     | '/projects/$id'
+    | '/projects/$id/edit/$docId'
     | '/projects/$id/mapping/$draftId'
   id:
     | '__root__'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/_app/team'
     | '/_app/templates'
     | '/_app/projects/$id'
+    | '/_app/projects/$id/edit/$docId'
     | '/_app/projects/$id/mapping/$draftId'
   fileRoutesById: FileRoutesById
 }
@@ -239,14 +251,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProjectsIdMappingDraftIdRouteImport
       parentRoute: typeof AppProjectsIdRoute
     }
+    '/_app/projects/$id/edit/$docId': {
+      id: '/_app/projects/$id/edit/$docId'
+      path: '/edit/$docId'
+      fullPath: '/projects/$id/edit/$docId'
+      preLoaderRoute: typeof AppProjectsIdEditDocIdRouteImport
+      parentRoute: typeof AppProjectsIdRoute
+    }
   }
 }
 
 interface AppProjectsIdRouteChildren {
+  AppProjectsIdEditDocIdRoute: typeof AppProjectsIdEditDocIdRoute
   AppProjectsIdMappingDraftIdRoute: typeof AppProjectsIdMappingDraftIdRoute
 }
 
 const AppProjectsIdRouteChildren: AppProjectsIdRouteChildren = {
+  AppProjectsIdEditDocIdRoute: AppProjectsIdEditDocIdRoute,
   AppProjectsIdMappingDraftIdRoute: AppProjectsIdMappingDraftIdRoute,
 }
 

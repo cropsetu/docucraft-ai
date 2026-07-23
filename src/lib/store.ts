@@ -73,6 +73,8 @@ interface Store {
   currentUser: string;
   projects: Project[];
   totalCount: number;
+  docContent: Record<string, string>;
+  docApproved: Record<string, boolean>;
   createProject: (input: CreateProjectInput) => string;
   getProject: (id: string) => Project | undefined;
   addTemplate: (projectId: string, name: string) => void;
@@ -80,6 +82,8 @@ interface Store {
   setGenerationMethod: (projectId: string, m: Project["generationMethod"]) => void;
   addDraft: (projectId: string, name: string, description?: string) => string;
   addGenerated: (projectId: string, filename: string, fromDraft: string) => void;
+  setDocContent: (docId: string, html: string) => void;
+  approveDoc: (docId: string, approved: boolean) => void;
 }
 
 let counter = 51363;
@@ -88,6 +92,8 @@ export const useStore = create<Store>((set, get) => ({
   currentUser: CURRENT_USER,
   projects: seedProjects,
   totalCount: 1250,
+  docContent: {},
+  docApproved: {},
   createProject: (input) => {
     const id = String(counter++);
     const created: Project = {
@@ -203,6 +209,10 @@ export const useStore = create<Store>((set, get) => ({
           : p,
       ),
     })),
+  setDocContent: (docId, html) =>
+    set((s) => ({ docContent: { ...s.docContent, [docId]: html } })),
+  approveDoc: (docId, approved) =>
+    set((s) => ({ docApproved: { ...s.docApproved, [docId]: approved } })),
 }));
 
 export const FUNCTIONS: FunctionKey[] = [
