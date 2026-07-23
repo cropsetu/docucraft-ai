@@ -133,6 +133,14 @@ export function AppShell({ children }: { children: ReactNode }) {
               </kbd>
             </div>
           </div>
+          <button
+            onClick={toggle}
+            className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground"
+            aria-label="Toggle theme"
+            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
           <button className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground">
             <HelpCircle className="h-4 w-4" />
           </button>
