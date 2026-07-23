@@ -107,15 +107,15 @@ function Dashboard() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-gradient-brand text-white text-left text-xs uppercase tracking-wider">
-                  <th className="px-4 py-3 font-semibold">Project name</th>
-                  <th className="px-4 py-3 font-semibold">Project ID</th>
-                  <th className="px-4 py-3 font-semibold">Document type</th>
-                  <th className="px-4 py-3 font-semibold">Function</th>
-                  <th className="px-4 py-3 font-semibold">Created on</th>
-                  <th className="px-4 py-3 font-semibold">Modified on</th>
-                  <th className="px-4 py-3 font-semibold">Status</th>
-                  <th className="px-4 py-3 font-semibold">Actions</th>
+                <tr className="bg-gradient-brand text-white text-left text-[11px] uppercase tracking-wider">
+                  <th className="px-4 py-3 font-semibold whitespace-nowrap">Project name</th>
+                  <th className="px-4 py-3 font-semibold whitespace-nowrap">Project ID</th>
+                  <th className="px-4 py-3 font-semibold whitespace-nowrap">Document type</th>
+                  <th className="px-4 py-3 font-semibold whitespace-nowrap">Function</th>
+                  <th className="px-4 py-3 font-semibold whitespace-nowrap">Created on</th>
+                  <th className="px-4 py-3 font-semibold whitespace-nowrap">Modified on</th>
+                  <th className="px-4 py-3 font-semibold whitespace-nowrap">Status</th>
+                  <th className="px-4 py-3 font-semibold whitespace-nowrap text-right pr-6">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -127,43 +127,44 @@ function Dashboard() {
                       idx % 2 === 1 && "bg-surface-elevated/30",
                     )}
                   >
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 max-w-[220px]">
                       <Link
                         to="/projects/$id"
                         params={{ id: p.id }}
-                        className="font-medium hover:text-brand hover:underline"
+                        className="block truncate font-medium hover:text-brand hover:underline"
+                        title={p.name}
                       >
                         {p.name}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 font-mono text-sm text-muted-foreground">{p.projectId}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 font-mono text-sm text-muted-foreground whitespace-nowrap">{p.projectId}</td>
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <span className="inline-flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-muted-foreground" />
-                        {p.documentType}
+                        <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <span className="truncate">{p.documentType}</span>
                       </span>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <span
                         className={cn(
-                          "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium",
+                          "inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-medium leading-5",
                           FUNCTION_COLORS[p.function],
                         )}
                       >
                         {p.function}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm">
+                    <td className="px-4 py-3 text-sm whitespace-nowrap">
                       <DateCell v={p.createdAt} />
                     </td>
-                    <td className="px-4 py-3 text-sm">
+                    <td className="px-4 py-3 text-sm whitespace-nowrap">
                       <DateCell v={p.modifiedAt} />
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <StatusBadge status={p.status} />
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1 opacity-70 group-hover:opacity-100">
+                    <td className="px-4 py-3 pr-6">
+                      <div className="flex items-center justify-end gap-1 opacity-70 group-hover:opacity-100">
                         <button className="p-1.5 rounded hover:bg-accent text-muted-foreground hover:text-foreground">
                           <Pencil className="h-4 w-4" />
                         </button>

@@ -16,9 +16,12 @@ import {
   PanelLeft,
   Menu,
   X,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useStore } from "@/lib/store";
+import { useTheme } from "@/lib/theme";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const NAV = [
@@ -34,6 +37,7 @@ const NAV = [
 export function AppShell({ children }: { children: ReactNode }) {
   const location = useLocation();
   const user = useStore((s) => s.currentUser);
+  const { theme, toggle } = useTheme();
 
   // Desktop: collapsed rail vs expanded. Persist preference.
   const [collapsed, setCollapsed] = useState<boolean>(() => {
@@ -129,6 +133,14 @@ export function AppShell({ children }: { children: ReactNode }) {
               </kbd>
             </div>
           </div>
+          <button
+            onClick={toggle}
+            className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground"
+            aria-label="Toggle theme"
+            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
           <button className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground">
             <HelpCircle className="h-4 w-4" />
           </button>
