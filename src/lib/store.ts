@@ -207,6 +207,10 @@ export const useStore = create<Store>((set, get) => ({
           : p,
       ),
     })),
+  setDocContent: (docId, html) =>
+    set((s) => ({ docContent: { ...s.docContent, [docId]: html } })),
+  approveDoc: (docId, approved) =>
+    set((s) => ({ docApproved: { ...s.docApproved, [docId]: approved } })),
 }));
 
 export const FUNCTIONS: FunctionKey[] = [
