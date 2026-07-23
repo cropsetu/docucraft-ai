@@ -105,6 +105,11 @@
   --warning: oklch(0.78 0.16 75);
   --info: oklch(0.72 0.17 240);
 
+  --token-source: oklch(0.72 0.17 240);
+  --token-prompt: oklch(0.7 0.2 20);
+  --token-conditional: oklch(0.72 0.17 160);
+  --token-repeat: oklch(0.7 0.22 300);
+
   --border: oklch(0.26 0.02 270);
   --border-strong: oklch(0.34 0.025 270);
   --input: oklch(0.26 0.02 270);
