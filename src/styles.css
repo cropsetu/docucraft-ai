@@ -49,6 +49,11 @@
   --color-warning: var(--warning);
   --color-info: var(--info);
 
+  --color-token-source: var(--token-source);
+  --color-token-prompt: var(--token-prompt);
+  --color-token-conditional: var(--token-conditional);
+  --color-token-repeat: var(--token-repeat);
+
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
