@@ -92,6 +92,8 @@ export const useStore = create<Store>((set, get) => ({
   currentUser: CURRENT_USER,
   projects: seedProjects,
   totalCount: 1250,
+  docContent: {},
+  docApproved: {},
   createProject: (input) => {
     const id = String(counter++);
     const created: Project = {
