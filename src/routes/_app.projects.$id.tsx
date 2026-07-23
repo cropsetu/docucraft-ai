@@ -303,12 +303,12 @@ function Step2Source({ project }: { project: any }) {
 }
 
 /* ------------------ Step 3 ------------------ */
-const METHODS = [
+const METHODS: Array<{ key: string; icon: any; title: string; desc: string; badge?: string }> = [
   { key: "ai", icon: Sparkles, title: "AI Auto-Generate", desc: "Full AI-powered generation. Fastest option.", badge: "Recommended" },
   { key: "chat", icon: MessageSquare, title: "Chat-Assisted", desc: "Interactive chat to guide AI through the generation." },
   { key: "manual", icon: Target, title: "Manual Mapping", desc: "Precise control over each section mapping." },
   { key: "hybrid", icon: GitBranch, title: "Hybrid", desc: "AI suggestions with manual review at each section." },
-] as const;
+];
 
 function Step3Method({ project }: { project: any }) {
   const set = useStore((s) => s.setGenerationMethod);
