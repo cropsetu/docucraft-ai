@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, notFound, useRouter } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -40,6 +40,8 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { listContainer, listItem, useCountUp, DUR, EASE, SPRING, staggerDelay } from "@/lib/motion";
 import { StageSkeleton } from "@/components/skeletons";
+import { ErrorBanner } from "@/components/error-banner";
+import type { Project } from "@/lib/types";
 
 export const Route = createFileRoute("/_app/projects/$id")({
   head: ({ params }) => ({
