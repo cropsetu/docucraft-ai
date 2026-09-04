@@ -187,11 +187,30 @@ function Dashboard() {
                 placeholder="Search projects…"
               />
             </div>
-            <button className="h-9 w-9 rounded-lg border border-border bg-surface hover:bg-accent hover:text-foreground flex items-center justify-center text-muted-foreground transition-colors">
+            <button
+              onClick={() => setShowFilters((v) => !v)}
+              aria-expanded={showFilters}
+              className={cn(
+                "h-9 inline-flex items-center gap-2 rounded-lg border px-3 text-sm transition-colors",
+                showFilters || activeFilterCount > 0
+                  ? "border-brand/40 bg-brand/10 text-brand"
+                  : "border-border bg-surface text-muted-foreground hover:bg-accent hover:text-foreground",
+              )}
+            >
               <Filter className="h-4 w-4" />
+              Filters
+              {activeFilterCount > 0 && (
+                <span className="rounded-full bg-brand/20 px-1.5 text-[11px] font-semibold tabular-nums">
+                  {activeFilterCount}
+                </span>
+              )}
             </button>
-            <button className="h-9 w-9 rounded-lg border border-border bg-surface hover:bg-accent hover:text-foreground flex items-center justify-center text-muted-foreground transition-colors">
-              <RefreshCcw className="h-4 w-4" />
+            <button
+              onClick={reload}
+              aria-label="Reload projects"
+              className="h-9 w-9 rounded-lg border border-border bg-surface hover:bg-accent hover:text-foreground flex items-center justify-center text-muted-foreground transition-colors"
+            >
+              <RefreshCcw className={cn("h-4 w-4", retrying && "animate-spin")} />
             </button>
             <button
               onClick={() => setCreateOpen(true)}
@@ -202,22 +221,98 @@ function Dashboard() {
           </div>
         </div>
 
+        <AnimatePresence initial={false}>
+          {showFilters && (
+            <motion.div
+              key="filters"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: DUR.base, ease: EASE.out }}
+              className="overflow-hidden"
+            >
+              <div className="mt-4 flex flex-wrap items-end gap-3 rounded-xl border border-border/80 bg-surface-elevated/50 p-4">
+                <FilterSelect
+                  label="Status"
+                  value={status}
+                  onChange={setStatus}
+                  options={[{ value: "all", label: "All statuses" }, ...statuses.map((s) => ({ value: s, label: s }))]}
+                />
+                <FilterSelect
+                  label="Category"
+                  value={fn}
+                  onChange={setFn}
+                  options={[{ value: "all", label: "All categories" }, ...functions.map((f) => ({ value: f, label: f }))]}
+                />
+                <FilterSelect
+                  label="Updated"
+                  value={updated}
+                  onChange={setUpdated}
+                  options={UPDATED_WINDOWS.map((w) => ({ value: w.value, label: w.label }))}
+                />
+                <FilterSelect
+                  label="Sort by"
+                  value={sortKey}
+                  onChange={(v) => setSortKey(v as SortKey)}
+                  options={[
+                    { value: "modified", label: "Updated time" },
+                    { value: "created", label: "Created time" },
+                    { value: "name", label: "Project name" },
+                    { value: "status", label: "Status" },
+                  ]}
+                />
+                <button
+                  onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
+                  className="h-9 inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3 text-[13px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                >
+                  {sortDir === "asc" ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />}
+                  {sortDir === "asc" ? "Ascending" : "Descending"}
+                </button>
+                {activeFilterCount > 0 && (
+                  <button
+                    onClick={resetFilters}
+                    className="h-9 rounded-lg px-3 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence initial={false}>
+          {loadError && (
+            <ErrorBanner
+              key="dashboard-error"
+              title="Couldn't load your projects"
+              message="The workspace list didn't come back. Your projects are safe — try again."
+              detail={loadError}
+              onRetry={reload}
+              retrying={retrying}
+              onDismiss={() => setLoadError(null)}
+              className="mt-4"
+            />
+          )}
+        </AnimatePresence>
+
         {/* Table */}
         <div className="mt-6 rounded-2xl bg-surface overflow-hidden elev-1">
           <div className="overflow-x-auto">
             <table className="w-full text-[13px]">
               <thead>
                 <tr className="bg-surface-elevated/70 text-left text-[10px] uppercase tracking-[0.12em] text-muted-foreground border-b border-border">
-                  <th className="px-4 py-3.5 font-semibold whitespace-nowrap">Project name</th>
+                  <SortableTh label="Project name" k="name" sortKey={sortKey} sortDir={sortDir} onSort={(k) => { setSortKey(k); setSortDir(sortKey === k && sortDir === "asc" ? "desc" : "asc"); }} />
                   <th className="px-4 py-3.5 font-semibold whitespace-nowrap">Project ID</th>
                   <th className="px-4 py-3.5 font-semibold whitespace-nowrap">Document type</th>
                   <th className="px-4 py-3.5 font-semibold whitespace-nowrap">Function</th>
-                  <th className="px-4 py-3.5 font-semibold whitespace-nowrap">Created on</th>
-                  <th className="px-4 py-3.5 font-semibold whitespace-nowrap">Modified on</th>
-                  <th className="px-4 py-3.5 font-semibold whitespace-nowrap">Status</th>
+                  <SortableTh label="Created on" k="created" sortKey={sortKey} sortDir={sortDir} onSort={(k) => { setSortKey(k); setSortDir(sortKey === k && sortDir === "asc" ? "desc" : "asc"); }} />
+                  <SortableTh label="Modified on" k="modified" sortKey={sortKey} sortDir={sortDir} onSort={(k) => { setSortKey(k); setSortDir(sortKey === k && sortDir === "asc" ? "desc" : "asc"); }} />
+                  <SortableTh label="Status" k="status" sortKey={sortKey} sortDir={sortDir} onSort={(k) => { setSortKey(k); setSortDir(sortKey === k && sortDir === "asc" ? "desc" : "asc"); }} />
                   <th className="px-4 py-3.5 font-semibold whitespace-nowrap text-right pr-6">Actions</th>
                 </tr>
               </thead>
+
               {!ready && <TableSkeleton rows={6} cols={8} />}
               {ready && (
 
