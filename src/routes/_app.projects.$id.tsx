@@ -30,7 +30,7 @@ import {
   Lock,
   Unlock,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,7 +38,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { listContainer, listItem, useCountUp } from "@/lib/motion";
+import { listContainer, listItem, useCountUp, DUR, EASE, SPRING, staggerDelay } from "@/lib/motion";
 
 export const Route = createFileRoute("/_app/projects/$id")({
   head: ({ params }) => ({
@@ -84,6 +84,7 @@ function ProjectDetail() {
   const activeStage = STAGES[activeIdx];
   const completedCount = Object.values(done).filter(Boolean).length;
   const progressPct = (completedCount / STAGES.length) * 100;
+  const stageCountUp = useCountUp(completedCount, 600);
 
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
