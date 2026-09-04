@@ -64,7 +64,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Desktop sidebar */}
       <aside
         className={cn(
-          "hidden md:flex flex-col border-r border-border bg-sidebar transition-[width] duration-200 ease-in-out",
+          "hidden md:flex flex-col border-r border-border bg-sidebar transition-[width] duration-200 ease-in-out sticky top-0 self-start h-screen overflow-y-auto",
           collapsed ? "w-16" : "w-60",
         )}
       >
