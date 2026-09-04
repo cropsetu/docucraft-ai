@@ -1,8 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useStore, FUNCTION_COLORS } from "@/lib/store";
 import { StatusBadge } from "@/components/status-badge";
 import { CreateProjectSheet } from "@/components/create-project-sheet";
+import { TableSkeleton, PolishedEmpty } from "@/components/skeletons";
+import { motion } from "framer-motion";
+import { DUR, EASE, staggerDelay } from "@/lib/motion";
 import {
   Search,
   Filter,
@@ -12,10 +15,12 @@ import {
   Trash2,
   MoreHorizontal,
   FileText,
+  FolderOpen,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({
