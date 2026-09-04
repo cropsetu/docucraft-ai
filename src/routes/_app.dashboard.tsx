@@ -570,7 +570,7 @@ function WelcomeBanner({
       className="relative overflow-hidden rounded-2xl border border-border bg-surface elev-1"
     >
       <div className="absolute inset-0 bg-hero-orbs opacity-70 pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-br from-brand/[0.06] via-transparent to-purple-500/[0.06] pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-brand/[0.06] via-transparent to-primary/[0.06] pointer-events-none" />
       <div className="relative p-6 md:p-8 lg:p-10">
         <div className="grid md:grid-cols-[1fr_auto] gap-8 items-center">
           <div className="space-y-6">
@@ -586,7 +586,7 @@ function WelcomeBanner({
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>
-                <span className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-emerald-500 border-2 border-background" />
+                <span className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-success border-2 border-background" />
               </motion.div>
               <div>
                 <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
