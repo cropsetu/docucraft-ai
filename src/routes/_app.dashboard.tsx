@@ -1,8 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useStore, FUNCTION_COLORS } from "@/lib/store";
 import { StatusBadge } from "@/components/status-badge";
 import { CreateProjectSheet } from "@/components/create-project-sheet";
+import { TableSkeleton, PolishedEmpty } from "@/components/skeletons";
+import { motion } from "framer-motion";
+import { DUR, EASE, staggerDelay } from "@/lib/motion";
 import {
   Search,
   Filter,
@@ -12,10 +15,12 @@ import {
   Trash2,
   MoreHorizontal,
   FileText,
+  FolderOpen,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({
@@ -48,33 +53,53 @@ function Dashboard() {
 
   const firstName = currentUser.split(" ")[0];
 
+  // Placeholder rows show until the workspace list has painted once.
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8">
       {/* Welcome banner */}
-      <div className="relative overflow-hidden rounded-2xl border border-border bg-surface p-8 md:p-10">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: DUR.reveal, ease: EASE.out }}
+        className="relative overflow-hidden rounded-2xl bg-surface p-8 md:p-10 elev-1"
+      >
         <div className="absolute inset-0 bg-hero-orbs opacity-70 pointer-events-none" />
         <div className="relative grid md:grid-cols-[1fr_auto] gap-8 items-center">
           <div>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-gradient">
+            <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand ai-pulse-uncertain" />
+              Workspace
+            </div>
+            <h1 className="mt-2 text-[2rem] md:text-[2.75rem] leading-[1.08] font-bold tracking-tight text-gradient">
               Welcome, {firstName}
             </h1>
-            <p className="mt-3 text-muted-foreground max-w-xl">
+            <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground max-w-xl">
               Create and manage AI-assisted document generation projects from a single workspace.
             </p>
           </div>
           <WelcomeIllustration />
         </div>
-      </div>
+      </motion.div>
 
       {/* Content studio */}
       <div>
         <div className="flex items-end justify-between gap-4 flex-wrap">
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight">
-              Content studio <span className="text-muted-foreground font-normal">({totalCount})</span>
+          <div className="min-w-0">
+            <h2 className="text-xl font-semibold tracking-tight flex items-center gap-2">
+              Content studio
+              <span className="rounded-full border border-border/80 bg-surface-elevated/60 px-2 py-0.5 text-xs font-medium tabular-nums text-muted-foreground">
+                {totalCount}
+              </span>
             </h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Start by creating a project. Everything you create will appear here for easy access and management.
+            <p className="text-sm leading-relaxed text-muted-foreground mt-1.5 max-w-2xl">
+              Start by creating a project. Everything you create appears here for easy access and management.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -83,19 +108,19 @@ function Dashboard() {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="h-9 rounded-lg bg-surface border border-border pl-9 pr-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 w-56"
+                className="h-9 rounded-lg bg-surface border border-border pl-9 pr-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-border-strong transition-colors w-56"
                 placeholder="Search projects…"
               />
             </div>
-            <button className="h-9 w-9 rounded-lg border border-border bg-surface hover:bg-accent flex items-center justify-center text-muted-foreground">
+            <button className="h-9 w-9 rounded-lg border border-border bg-surface hover:bg-accent hover:text-foreground flex items-center justify-center text-muted-foreground transition-colors">
               <Filter className="h-4 w-4" />
             </button>
-            <button className="h-9 w-9 rounded-lg border border-border bg-surface hover:bg-accent flex items-center justify-center text-muted-foreground">
+            <button className="h-9 w-9 rounded-lg border border-border bg-surface hover:bg-accent hover:text-foreground flex items-center justify-center text-muted-foreground transition-colors">
               <RefreshCcw className="h-4 w-4" />
             </button>
             <button
               onClick={() => setCreateOpen(true)}
-              className="h-9 inline-flex items-center gap-2 rounded-lg bg-gradient-brand text-white px-4 text-sm font-medium hover:opacity-90"
+              className="h-9 inline-flex items-center gap-2 rounded-lg bg-gradient-brand text-white px-4 text-sm font-medium hover:opacity-90 transition-opacity"
             >
               <Plus className="h-4 w-4" /> Create project
             </button>
@@ -103,90 +128,121 @@ function Dashboard() {
         </div>
 
         {/* Table */}
-        <div className="mt-6 rounded-xl border border-border bg-surface overflow-hidden">
+        <div className="mt-6 rounded-2xl bg-surface overflow-hidden elev-1">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full text-[13px]">
               <thead>
-                <tr className="bg-gradient-brand text-white text-left text-[11px] uppercase tracking-wider">
-                  <th className="px-4 py-3 font-semibold whitespace-nowrap">Project name</th>
-                  <th className="px-4 py-3 font-semibold whitespace-nowrap">Project ID</th>
-                  <th className="px-4 py-3 font-semibold whitespace-nowrap">Document type</th>
-                  <th className="px-4 py-3 font-semibold whitespace-nowrap">Function</th>
-                  <th className="px-4 py-3 font-semibold whitespace-nowrap">Created on</th>
-                  <th className="px-4 py-3 font-semibold whitespace-nowrap">Modified on</th>
-                  <th className="px-4 py-3 font-semibold whitespace-nowrap">Status</th>
-                  <th className="px-4 py-3 font-semibold whitespace-nowrap text-right pr-6">Actions</th>
+                <tr className="bg-surface-elevated/70 text-left text-[10px] uppercase tracking-[0.12em] text-muted-foreground border-b border-border">
+                  <th className="px-4 py-3.5 font-semibold whitespace-nowrap">Project name</th>
+                  <th className="px-4 py-3.5 font-semibold whitespace-nowrap">Project ID</th>
+                  <th className="px-4 py-3.5 font-semibold whitespace-nowrap">Document type</th>
+                  <th className="px-4 py-3.5 font-semibold whitespace-nowrap">Function</th>
+                  <th className="px-4 py-3.5 font-semibold whitespace-nowrap">Created on</th>
+                  <th className="px-4 py-3.5 font-semibold whitespace-nowrap">Modified on</th>
+                  <th className="px-4 py-3.5 font-semibold whitespace-nowrap">Status</th>
+                  <th className="px-4 py-3.5 font-semibold whitespace-nowrap text-right pr-6">Actions</th>
                 </tr>
               </thead>
+              {!ready && <TableSkeleton rows={6} cols={8} />}
+              {ready && (
+
               <tbody>
                 {filtered.map((p, idx) => (
-                  <tr
+                  <motion.tr
                     key={p.id}
-                    className={cn(
-                      "border-t border-border hover:bg-accent/40 transition-colors group",
-                      idx % 2 === 1 && "bg-surface-elevated/30",
-                    )}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: DUR.base, ease: EASE.out, delay: staggerDelay(idx, 0.03) }}
+                    className="border-t border-border/70 hover:bg-accent/40 transition-colors group"
                   >
-                    <td className="px-4 py-3 max-w-[220px]">
+                    <td className="px-4 py-3.5 max-w-[240px]">
                       <Link
                         to="/projects/$id"
                         params={{ id: p.id }}
-                        className="block truncate font-medium hover:text-brand hover:underline"
+                        className="block truncate font-medium text-[13.5px] tracking-tight hover:text-brand transition-colors"
                         title={p.name}
                       >
                         {p.name}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 font-mono text-sm text-muted-foreground whitespace-nowrap">{p.projectId}</td>
-                    <td className="px-4 py-3 whitespace-nowrap">
+                    <td className="px-4 py-3.5 font-mono text-xs text-muted-foreground whitespace-nowrap tabular-nums">{p.projectId}</td>
+                    <td className="px-4 py-3.5 whitespace-nowrap">
                       <span className="inline-flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                         <span className="truncate">{p.documentType}</span>
                       </span>
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
+                    <td className="px-4 py-3.5 whitespace-nowrap">
                       <span
                         className={cn(
-                          "inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-medium leading-5",
+                          "inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[11px] font-medium leading-5",
                           FUNCTION_COLORS[p.function],
                         )}
                       >
                         {p.function}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm whitespace-nowrap">
+                    <td className="px-4 py-3.5 whitespace-nowrap">
                       <DateCell v={p.createdAt} />
                     </td>
-                    <td className="px-4 py-3 text-sm whitespace-nowrap">
+                    <td className="px-4 py-3.5 whitespace-nowrap">
                       <DateCell v={p.modifiedAt} />
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
+                    <td className="px-4 py-3.5 whitespace-nowrap">
                       <StatusBadge status={p.status} />
                     </td>
-                    <td className="px-4 py-3 pr-6">
-                      <div className="flex items-center justify-end gap-1 opacity-70 group-hover:opacity-100">
-                        <button className="p-1.5 rounded hover:bg-accent text-muted-foreground hover:text-foreground">
-                          <Pencil className="h-4 w-4" />
+                    <td className="px-4 py-3.5 pr-6">
+                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                        <button className="p-1.5 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">
+                          <Pencil className="h-3.5 w-3.5" />
                         </button>
-                        <button className="p-1.5 rounded hover:bg-accent text-muted-foreground hover:text-destructive">
-                          <Trash2 className="h-4 w-4" />
+                        <button className="p-1.5 rounded-md hover:bg-accent text-muted-foreground hover:text-destructive transition-colors">
+                          <Trash2 className="h-3.5 w-3.5" />
                         </button>
-                        <button className="p-1.5 rounded hover:bg-accent text-muted-foreground">
-                          <MoreHorizontal className="h-4 w-4" />
+                        <button className="p-1.5 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">
+                          <MoreHorizontal className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="px-4 py-12 text-center text-muted-foreground text-sm">
-                      No projects match your search.
+                    <td colSpan={8} className="p-6">
+                      <PolishedEmpty
+                        icon={<FolderOpen className="h-6 w-6" />}
+                        title={search ? "No matching projects" : "No projects yet"}
+                        subtitle={
+                          search
+                            ? "Try a different name, ID, document type, or function."
+                            : "Create your first project to start generating documents from your templates and sources."
+                        }
+                        action={
+                          search ? (
+                            <button
+                              onClick={() => setSearch("")}
+                              className="h-9 rounded-lg border border-border bg-surface px-4 text-sm hover:bg-accent transition-colors"
+                            >
+                              Clear search
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => setCreateOpen(true)}
+                              className="h-9 inline-flex items-center gap-2 rounded-lg bg-gradient-brand text-white px-4 text-sm font-medium hover:opacity-90 transition-opacity"
+                            >
+                              <Plus className="h-4 w-4" /> Create project
+                            </button>
+                          )
+                        }
+                        className="border-0 bg-transparent py-8"
+                      />
                     </td>
                   </tr>
                 )}
               </tbody>
+              )}
             </table>
+
           </div>
           <div className="border-t border-border px-4 py-3 flex items-center justify-between text-xs text-muted-foreground">
             <div>Showing 1-{filtered.length} of {totalCount}</div>

@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate, notFound } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -39,6 +39,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { listContainer, listItem, useCountUp, DUR, EASE, SPRING, staggerDelay } from "@/lib/motion";
+import { StageSkeleton } from "@/components/skeletons";
 
 export const Route = createFileRoute("/_app/projects/$id")({
   head: ({ params }) => ({
@@ -85,6 +86,13 @@ function ProjectDetail() {
   const completedCount = Object.values(done).filter(Boolean).length;
   const progressPct = (completedCount / STAGES.length) * 100;
   const stageCountUp = useCountUp(completedCount, 600);
+
+  // Stage body shows placeholders until the panel has painted once.
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
@@ -180,22 +188,27 @@ function ProjectDetail() {
           </div>
         </div>
         <div className="p-6">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={active}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: DUR.base, ease: EASE.out }}
-            >
-              {active === "template" && <Step1Template project={project} />}
-              {active === "source" && <Step2Source project={project} />}
-              {active === "method" && <Step3Method project={project} />}
-              {active === "mapping" && <Step4Drafts project={project} />}
-              {active === "drafts" && <Step5Generated project={project} />}
-            </motion.div>
-          </AnimatePresence>
+          {!ready ? (
+            <StageSkeleton lines={3} />
+          ) : (
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={active}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: DUR.base, ease: EASE.out }}
+              >
+                {active === "template" && <Step1Template project={project} />}
+                {active === "source" && <Step2Source project={project} />}
+                {active === "method" && <Step3Method project={project} />}
+                {active === "mapping" && <Step4Drafts project={project} />}
+                {active === "drafts" && <Step5Generated project={project} />}
+              </motion.div>
+            </AnimatePresence>
+          )}
         </div>
+
       </div>
     </div>
   );
@@ -213,7 +226,7 @@ function PipelineRail({
   onSelect: (k: StageKey) => void;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-surface p-4 elev-1">
+    <div className="rounded-2xl bg-surface p-5 elev-1">
       <div className="grid grid-cols-5 gap-3 relative">
         {stages.map((s, i) => {
           const isActive = active === s.key;
@@ -229,9 +242,9 @@ function PipelineRail({
             >
               {/* Connector line */}
               {i < stages.length - 1 && (
-                <div className="hidden md:block absolute top-5 left-[calc(50%+22px)] right-[-12px] h-px bg-border overflow-hidden">
+                <div className="hidden md:block absolute top-6 left-[calc(50%+26px)] right-[-12px] h-[2px] rounded-full bg-border/70 overflow-hidden">
                   <motion.div
-                    className="h-px bg-brand/70 origin-left"
+                    className="h-full rounded-full bg-gradient-brand origin-left"
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: linkLit ? 1 : 0 }}
                     transition={{ duration: DUR.revealSlow, ease: EASE.out, delay: staggerDelay(i, 0.06) }}
@@ -241,38 +254,45 @@ function PipelineRail({
               )}
               <button
                 onClick={() => onSelect(s.key)}
-                className="w-full flex flex-col items-center text-center gap-2 group"
+                aria-current={isActive ? "step" : undefined}
+                className="w-full flex flex-col items-center text-center gap-2.5 group rounded-xl py-1 outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
               >
                 <span className="relative flex items-center justify-center">
                   {isActive && (
-                    <motion.span
-                      layoutId="stage-halo"
-                      className="absolute inset-[-6px] rounded-full bg-brand/15"
-                      transition={SPRING.ui}
-                    />
+                    <>
+                      <motion.span
+                        layoutId="stage-halo"
+                        className="absolute inset-[-9px] rounded-full bg-brand/14 ring-1 ring-brand/35"
+                        transition={SPRING.ui}
+                      />
+                      <span className="absolute inset-[-9px] rounded-full ai-pulse-uncertain" />
+                    </>
                   )}
                   <motion.span
                     whileHover={{ scale: 1.06 }}
                     whileTap={{ scale: 0.96 }}
                     transition={SPRING.ui}
                     className={cn(
-                      "h-10 w-10 rounded-full flex items-center justify-center border-2 font-mono text-sm font-semibold relative z-10",
+                      "h-11 w-11 rounded-full flex items-center justify-center border-2 font-mono text-sm font-semibold relative z-10 transition-colors",
                       isActive
                         ? "bg-gradient-brand text-white border-transparent shadow-lg shadow-brand/30"
                         : isDone
-                        ? "bg-success/10 text-success border-success/40"
+                        ? "bg-success/12 text-success border-success/45 group-hover:border-success/70"
                         : "bg-background text-muted-foreground border-border group-hover:border-border-strong group-hover:text-foreground",
                     )}
                   >
                     {isDone && !isActive ? <Check className="h-4 w-4" /> : s.n}
                   </motion.span>
                 </span>
-                <div className="min-w-0">
+                <div className="min-w-0 w-full">
                   <div className={cn(
-                    "text-sm font-semibold truncate",
-                    isActive ? "text-foreground" : isDone ? "text-foreground" : "text-muted-foreground",
+                    "text-[13px] font-semibold tracking-tight truncate",
+                    isActive || isDone ? "text-foreground" : "text-muted-foreground group-hover:text-foreground",
                   )}>{s.title}</div>
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono truncate">
+                  <div className={cn(
+                    "text-[10px] uppercase tracking-[0.12em] font-mono truncate mt-0.5",
+                    isActive ? "text-brand" : isDone ? "text-success" : "text-muted-foreground",
+                  )}>
                     {isDone ? "Complete" : isActive ? "Current" : s.short}
                   </div>
                 </div>
@@ -282,6 +302,7 @@ function PipelineRail({
         })}
       </div>
     </div>
+
   );
 }
 
@@ -732,13 +753,19 @@ function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center py-6 text-center">
-      <div className="mb-4">{illustration}</div>
-      <div className="font-semibold">{title}</div>
-      <div className="text-sm text-muted-foreground max-w-sm mt-1">{subtitle}</div>
-      {action && <div className="mt-5">{action}</div>}
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: DUR.reveal, ease: EASE.out }}
+      className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/80 bg-surface-elevated/30 px-6 py-10 text-center"
+    >
+      <div className="mb-5">{illustration}</div>
+      <div className="text-base font-semibold tracking-tight">{title}</div>
+      <div className="text-sm leading-relaxed text-muted-foreground max-w-sm mt-1.5">{subtitle}</div>
+      {action && <div className="mt-6">{action}</div>}
+    </motion.div>
   );
+
 }
 
 function UploadDialog({
