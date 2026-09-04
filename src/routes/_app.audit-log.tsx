@@ -3,6 +3,8 @@ import { Download, Filter, Search, FileText, UserCog, ShieldCheck, Trash2, Uploa
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import { DUR, EASE, staggerDelay } from "@/lib/motion";
 
 export const Route = createFileRoute("/_app/audit-log")({
   head: () => ({ meta: [{ title: "Audit Log — DocuMind AI" }, { name: "description", content: "Compliance-grade audit trail." }] }),
@@ -32,6 +34,13 @@ const sevTone: Record<Sev, string> = {
   success: "bg-emerald-500/10 text-emerald-500",
   warning: "bg-amber-500/10 text-amber-500",
   danger: "bg-red-500/10 text-red-500",
+};
+
+const sevDot: Record<Sev, string> = {
+  info: "bg-ai-active",
+  success: "bg-ai-confident",
+  warning: "bg-ai-uncertain",
+  danger: "bg-ai-blocked",
 };
 
 function AuditLogPage() {
