@@ -526,3 +526,151 @@ function SortableTh({
     </th>
   );
 }
+
+function WelcomeBanner({
+  user,
+  projects,
+  onCreate,
+}: {
+  user: string;
+  projects: Project[];
+  onCreate: () => void;
+}) {
+  const firstName = user.split(" ")[0];
+  const [greeting, setGreeting] = useState("Welcome");
+
+  useEffect(() => {
+    const h = new Date().getHours();
+    if (h < 12) setGreeting("Good morning");
+    else if (h < 17) setGreeting("Good afternoon");
+    else setGreeting("Good evening");
+  }, []);
+
+  const generated = projects.reduce((sum, p) => sum + p.generated.length, 0);
+  const inProgress = projects.filter((p) => p.status === "In Progress").length;
+  const completed = projects.filter((p) => p.status === "Completed").length;
+
+  const projectCount = useCountUp(projects.length, 900);
+  const progressCount = useCountUp(inProgress, 900);
+  const completedCount = useCountUp(completed, 900);
+  const generatedCount = useCountUp(generated, 900);
+
+  const userInitials = user
+    .split(" ")
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12, scale: 0.995 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: DUR.revealSlow, ease: EASE.out }}
+      className="relative overflow-hidden rounded-2xl border border-border bg-surface elev-1"
+    >
+      <div className="absolute inset-0 bg-hero-orbs opacity-70 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-brand/[0.06] via-transparent to-purple-500/[0.06] pointer-events-none" />
+      <div className="relative p-6 md:p-8 lg:p-10">
+        <div className="grid md:grid-cols-[1fr_auto] gap-8 items-center">
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ ...SPRING.pop, delay: 0.05 }}
+                className="relative"
+              >
+                <Avatar className="h-14 w-14 md:h-16 md:w-16 border-2 border-background shadow-xl ring-2 ring-brand/10">
+                  <AvatarFallback className="text-lg md:text-xl bg-gradient-brand text-white font-semibold">
+                    {userInitials}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-emerald-500 border-2 border-background" />
+              </motion.div>
+              <div>
+                <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand ai-pulse-uncertain" />
+                  Workspace
+                </div>
+                <h1 className="text-[2rem] md:text-[2.75rem] leading-[1.08] font-bold tracking-tight text-gradient">
+                  {greeting}, {firstName}
+                </h1>
+              </div>
+            </div>
+
+            <p className="text-[15px] leading-relaxed text-muted-foreground max-w-xl">
+              {inProgress > 0 ? (
+                <>
+                  You have <strong className="text-foreground">{inProgress}</strong> active project
+                  {inProgress === 1 ? "" : "s"} and <strong className="text-foreground">{generated}</strong> generated document
+                  {generated === 1 ? "" : "s"} in this workspace.
+                </>
+              ) : (
+                "Create and manage AI-assisted document generation projects from a single workspace."
+              )}
+            </p>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={onCreate}
+                className="h-10 inline-flex items-center gap-2 rounded-lg bg-brand text-white px-4 text-sm font-semibold shadow-lg hover:bg-brand/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+              >
+                <Plus className="h-4 w-4" /> New project
+              </button>
+              <Link
+                to="/templates"
+                className="h-10 inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+              >
+                <Sparkles className="h-4 w-4" /> Browse templates
+              </Link>
+              <Link
+                to="/chat"
+                className="h-10 inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+              >
+                <MessageSquare className="h-4 w-4" /> Ask AI
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 max-w-md">
+              <StatCard label="Projects" value={projectCount} icon={FolderOpen} />
+              <StatCard label="Active" value={progressCount} icon={Target} />
+              <StatCard label="Completed" value={completedCount} icon={FileText} />
+            </div>
+          </div>
+
+          <div className="hidden md:block">
+            <WelcomeIllustration />
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value: number;
+  icon: React.ElementType;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: DUR.reveal, ease: EASE.out, delay: 0.12 }}
+      className="rounded-xl border border-border bg-background/60 backdrop-blur-sm p-3"
+    >
+      <div className="flex items-center gap-2 text-muted-foreground mb-1">
+        <Icon className="h-4 w-4" />
+        <span className="text-[11px] font-semibold uppercase tracking-[0.12em]">{label}</span>
+      </div>
+      <div className="text-2xl font-bold tabular-nums tracking-tight text-foreground">
+        {Math.round(value)}
+      </div>
+    </motion.div>
+  );
+}
