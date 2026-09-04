@@ -148,73 +148,101 @@ function Dashboard() {
 
               <tbody>
                 {filtered.map((p, idx) => (
-                  <tr
+                  <motion.tr
                     key={p.id}
-                    className={cn(
-                      "border-t border-border hover:bg-accent/40 transition-colors group",
-                      idx % 2 === 1 && "bg-surface-elevated/30",
-                    )}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: DUR.base, ease: EASE.out, delay: staggerDelay(idx, 0.03) }}
+                    className="border-t border-border/70 hover:bg-accent/40 transition-colors group"
                   >
-                    <td className="px-4 py-3 max-w-[220px]">
+                    <td className="px-4 py-3.5 max-w-[240px]">
                       <Link
                         to="/projects/$id"
                         params={{ id: p.id }}
-                        className="block truncate font-medium hover:text-brand hover:underline"
+                        className="block truncate font-medium text-[13.5px] tracking-tight hover:text-brand transition-colors"
                         title={p.name}
                       >
                         {p.name}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 font-mono text-sm text-muted-foreground whitespace-nowrap">{p.projectId}</td>
-                    <td className="px-4 py-3 whitespace-nowrap">
+                    <td className="px-4 py-3.5 font-mono text-xs text-muted-foreground whitespace-nowrap tabular-nums">{p.projectId}</td>
+                    <td className="px-4 py-3.5 whitespace-nowrap">
                       <span className="inline-flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                         <span className="truncate">{p.documentType}</span>
                       </span>
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
+                    <td className="px-4 py-3.5 whitespace-nowrap">
                       <span
                         className={cn(
-                          "inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-medium leading-5",
+                          "inline-flex items-center whitespace-nowrap rounded-full border px-2.5 py-0.5 text-[11px] font-medium leading-5",
                           FUNCTION_COLORS[p.function],
                         )}
                       >
                         {p.function}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm whitespace-nowrap">
+                    <td className="px-4 py-3.5 whitespace-nowrap">
                       <DateCell v={p.createdAt} />
                     </td>
-                    <td className="px-4 py-3 text-sm whitespace-nowrap">
+                    <td className="px-4 py-3.5 whitespace-nowrap">
                       <DateCell v={p.modifiedAt} />
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
+                    <td className="px-4 py-3.5 whitespace-nowrap">
                       <StatusBadge status={p.status} />
                     </td>
-                    <td className="px-4 py-3 pr-6">
-                      <div className="flex items-center justify-end gap-1 opacity-70 group-hover:opacity-100">
-                        <button className="p-1.5 rounded hover:bg-accent text-muted-foreground hover:text-foreground">
-                          <Pencil className="h-4 w-4" />
+                    <td className="px-4 py-3.5 pr-6">
+                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                        <button className="p-1.5 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">
+                          <Pencil className="h-3.5 w-3.5" />
                         </button>
-                        <button className="p-1.5 rounded hover:bg-accent text-muted-foreground hover:text-destructive">
-                          <Trash2 className="h-4 w-4" />
+                        <button className="p-1.5 rounded-md hover:bg-accent text-muted-foreground hover:text-destructive transition-colors">
+                          <Trash2 className="h-3.5 w-3.5" />
                         </button>
-                        <button className="p-1.5 rounded hover:bg-accent text-muted-foreground">
-                          <MoreHorizontal className="h-4 w-4" />
+                        <button className="p-1.5 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">
+                          <MoreHorizontal className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="px-4 py-12 text-center text-muted-foreground text-sm">
-                      No projects match your search.
+                    <td colSpan={8} className="p-6">
+                      <PolishedEmpty
+                        icon={<FolderOpen className="h-6 w-6" />}
+                        title={search ? "No matching projects" : "No projects yet"}
+                        subtitle={
+                          search
+                            ? "Try a different name, ID, document type, or function."
+                            : "Create your first project to start generating documents from your templates and sources."
+                        }
+                        action={
+                          search ? (
+                            <button
+                              onClick={() => setSearch("")}
+                              className="h-9 rounded-lg border border-border bg-surface px-4 text-sm hover:bg-accent transition-colors"
+                            >
+                              Clear search
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => setCreateOpen(true)}
+                              className="h-9 inline-flex items-center gap-2 rounded-lg bg-gradient-brand text-white px-4 text-sm font-medium hover:opacity-90 transition-opacity"
+                            >
+                              <Plus className="h-4 w-4" /> Create project
+                            </button>
+                          )
+                        }
+                        className="border-0 bg-transparent py-8"
+                      />
                     </td>
                   </tr>
                 )}
               </tbody>
+              )}
             </table>
+
           </div>
           <div className="border-t border-border px-4 py-3 flex items-center justify-between text-xs text-muted-foreground">
             <div>Showing 1-{filtered.length} of {totalCount}</div>
