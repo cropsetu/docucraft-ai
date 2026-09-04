@@ -53,8 +53,27 @@ export const Route = createFileRoute("/_app/projects/$id")({
     if (!proj) throw notFound();
     return null;
   },
+  errorComponent: ({ error, reset }) => (
+    <div className="p-6 md:p-8 max-w-3xl mx-auto">
+      <ErrorBanner
+        title="Couldn't load this project"
+        message="The project details didn't come back. Nothing was lost — try loading it again."
+        detail={error instanceof Error ? error.message : String(error)}
+        onRetry={reset}
+      />
+    </div>
+  ),
+  notFoundComponent: () => (
+    <div className="p-6 md:p-8 max-w-3xl mx-auto">
+      <ErrorBanner
+        title="Project not found"
+        message="This project no longer exists in your workspace."
+      />
+    </div>
+  ),
   component: ProjectDetail,
 });
+
 
 const STAGES = [
   { key: "template", n: 1, title: "Template", short: "Blueprint", icon: UploadCloud, hint: "Define the document structure" },
