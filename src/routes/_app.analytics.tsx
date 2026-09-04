@@ -149,9 +149,14 @@ function AnalyticsPage() {
           <h2 className="font-semibold">Top templates</h2>
           <p className="text-xs text-muted-foreground">Ranked by usage this month</p>
         </div>
-        <div className="divide-y divide-border">
+        <motion.div
+          className="divide-y divide-border"
+          variants={listContainer(0.04)}
+          initial="hidden"
+          animate="show"
+        >
           {TOP_TEMPLATES.map((t, i) => (
-            <div key={t.name} className="p-4 flex items-center gap-4">
+            <motion.div key={t.name} variants={listItem} className="p-4 flex items-center gap-4">
               <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground">
                 {i + 1}
               </div>
@@ -160,9 +165,9 @@ function AnalyticsPage() {
                 <div className="text-xs text-muted-foreground">{t.uses} generations</div>
               </div>
               <span className="text-xs font-medium text-emerald-500">{t.growth}</span>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </div>
   );
