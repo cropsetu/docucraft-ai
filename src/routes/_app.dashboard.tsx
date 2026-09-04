@@ -7,6 +7,7 @@ import { TableSkeleton, PolishedEmpty } from "@/components/skeletons";
 import { ErrorBanner } from "@/components/error-banner";
 import { motion, AnimatePresence } from "framer-motion";
 import { DUR, EASE, staggerDelay } from "@/lib/motion";
+import aiDocumentHero from "@/assets/ai-document-hero.png";
 import {
   Search,
   Filter,
@@ -165,20 +166,6 @@ function Dashboard() {
             <p className="mt-4 text-[15px] md:text-base leading-relaxed text-muted-foreground max-w-xl">
               Create and manage AI-assisted document generation projects from a single workspace. Your documents, templates, and team are all here.
             </p>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <button
-                onClick={() => setCreateOpen(true)}
-                className="h-10 inline-flex items-center gap-2 rounded-xl bg-gradient-brand text-white px-5 text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-brand/20"
-              >
-                <Plus className="h-4 w-4" /> New project
-              </button>
-              <Link
-                to="/templates"
-                className="h-10 inline-flex items-center gap-2 rounded-xl border border-border bg-surface-elevated/60 px-5 text-sm font-medium text-foreground hover:bg-accent hover:border-border-strong transition-colors"
-              >
-                <FileText className="h-4 w-4 text-muted-foreground" /> Browse templates
-              </Link>
-            </div>
           </div>
           <WelcomeIllustration />
         </div>
@@ -473,45 +460,17 @@ function DateCell({ v }: { v: string }) {
 
 function WelcomeIllustration() {
   return (
-    <svg viewBox="0 0 240 180" className="w-56 md:w-72 h-auto drop-shadow-2xl">
-      <defs>
-        <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="oklch(0.68 0.18 265)" />
-          <stop offset="1" stopColor="oklch(0.58 0.22 295)" />
-        </linearGradient>
-        <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="oklch(0.3 0.03 270)" />
-          <stop offset="1" stopColor="oklch(0.22 0.02 270)" />
-        </linearGradient>
-        <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="6" result="blur" />
-          <feComposite in="SourceGraphic" in2="blur" operator="over" />
-        </filter>
-      </defs>
-      {/* Source document */}
-      <rect x="18" y="28" width="92" height="124" rx="10" fill="url(#g2)" stroke="oklch(0.38 0.03 270)" strokeWidth="1.5" />
-      <rect x="32" y="50" width="64" height="5" rx="2.5" fill="url(#g1)" />
-      <rect x="32" y="64" width="54" height="4" rx="2" fill="oklch(0.45 0.02 270)" />
-      <rect x="32" y="74" width="60" height="4" rx="2" fill="oklch(0.45 0.02 270)" />
-      <rect x="32" y="84" width="48" height="4" rx="2" fill="oklch(0.45 0.02 270)" />
-      <rect x="32" y="100" width="40" height="4" rx="2" fill="oklch(0.55 0.02 270)" />
-      <rect x="32" y="110" width="52" height="4" rx="2" fill="oklch(0.55 0.02 270)" />
-      {/* AI core */}
-      <circle cx="148" cy="66" r="26" fill="url(#g1)" opacity="0.95" filter="url(#softGlow)" />
-      <path d="M138 66 L146 74 L160 58" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.95" />
-      {/* Connection lines */}
-      <path d="M110 70 L122 66" stroke="url(#g1)" strokeWidth="2.5" strokeLinecap="round" />
-      <path d="M110 110 L122 86" stroke="url(#g1)" strokeWidth="2.5" strokeLinecap="round" opacity="0.6" />
-      {/* Generated document */}
-      <rect x="126" y="98" width="96" height="56" rx="10" fill="oklch(0.28 0.04 275)" stroke="oklch(0.42 0.04 275)" strokeWidth="1.5" />
-      <rect x="140" y="112" width="68" height="4" rx="2" fill="url(#g1)" />
-      <rect x="140" y="122" width="60" height="3" rx="1.5" fill="oklch(0.55 0.02 270)" />
-      <rect x="140" y="130" width="54" height="3" rx="1.5" fill="oklch(0.55 0.02 270)" />
-      <rect x="140" y="138" width="44" height="3" rx="1.5" fill="oklch(0.55 0.02 270)" />
-      {/* Floating sparkles */}
-      <circle cx="196" cy="44" r="4" fill="url(#g1)" opacity="0.8" />
-      <circle cx="48" cy="158" r="3" fill="oklch(0.6 0.15 290)" opacity="0.6" />
-    </svg>
+    <div className="relative hidden md:block w-64 lg:w-80 h-44 lg:h-52 rounded-2xl overflow-hidden border border-border/60 elev-1 shrink-0">
+      <img
+        src={aiDocumentHero}
+        alt="AI document processing"
+        width={1024}
+        height={768}
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+      <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-surface/90" />
+      <div className="absolute inset-0 bg-gradient-to-t from-surface/70 via-transparent to-transparent" />
+    </div>
   );
 }
 
