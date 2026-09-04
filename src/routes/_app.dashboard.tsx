@@ -53,6 +53,14 @@ function Dashboard() {
 
   const firstName = currentUser.split(" ")[0];
 
+  // Placeholder rows show until the workspace list has painted once.
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+
   return (
     <div className="p-8 space-y-8">
       {/* Welcome banner */}
