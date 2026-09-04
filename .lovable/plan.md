@@ -1,87 +1,100 @@
+# Make the intelligence visible — motion & presentation pass
 
-## Goal
+One note before we start: in this project the data still comes from the in-app
+store (`src/lib/store.ts`) — there is no FastAPI client in the codebase. So every
+count, stage, confidence value and QA result below is wired to the state the app
+already holds, and anything the store doesn't have is simply omitted rather than
+invented. When the real API is wired in, these surfaces read from it unchanged.
 
-Turn the Templates page from a static grid into a real template-authoring surface. Every template is built out of color-coded tokens the generator understands:
+`framer-motion` is already installed, so no new dependency is needed.
 
-- **Black** — static text, taken verbatim
-- **Blue** — Source Value, pulls from a mapped source field
-- **Red** — LLM Prompt, replaced at generate-time by AI
-- **Green** — Conditional (show/hide a block based on a rule)
-- **Purple** — Repeat (loop a block over source rows, for tables/lists)
+## 1. Visual + motion foundation
 
-## Templates page (list + editor split)
+- `src/lib/motion.ts` (new): spring presets, durations (micro 150–250ms, reveal
+  300–500ms), stagger helper capped at 12 children, and a reduced-motion flag.
+  Every component imports from here — no ad-hoc numbers.
+- `src/styles.css`: add OKLCH tokens `--ai-idle / --ai-active / --ai-confident /
+  --ai-uncertain / --ai-blocked` and `--run-placeholder / --run-instruction /
+  --run-mergefield` for both themes, mapped in `@theme inline`. Custom
+  `::selection` (app chrome) plus a distinct selection colour scoped to the
+  template editor. A global `prefers-reduced-motion` block collapses all motion
+  to opacity-only.
+- `src/components/atmosphere.tsx` (new), rendered once inside the app shell
+  behind content: 3 blurred radial gradients drifting on a ~25s transform-only
+  loop, plus a 2–3% grain overlay. Pauses on `document.hidden`.
+- Elevation pass: layered soft shadows + 1px low-alpha border utilities;
+  backdrop-blur limited to overlays and floating toolbars. Focus rings and
+  skeletons switch to the intelligence ramp.
+- Route transitions: 200ms fade + 8px rise wrapper in `src/routes/_app.tsx`.
 
-`src/routes/_app.templates.tsx` becomes a two-pane layout:
+## 2. Compile reveal (Stage 1, template import)
 
-- **Left rail** — searchable saved-templates list (existing dummy data, compact rows: name, category, version, updated). "+ New template" and "Import .docx" at the top.
-- **Right pane** — the token editor for the selected template. Empty state prompts New or Import.
+In `src/components/template-conversion-wizard.tsx` (detect step) and the project
+Template stage: replace the plain loading state with a staged reveal listing the
+six real pipeline stages, each sliding in with a check that draws. Completion is
+driven by the actual async detection promise; if it resolves early the remaining
+stages flush at ≤120ms each, total capped at 2.5s. Behind the list, a wireframe
+"document scan" of the actual paragraph blocks with a scan-line sweep, blocks
+lighting up as they're classified. On completion the real detected counts
+(fields, conditions, blocks, MERGEFIELDs) spring-count from 0, and the skeleton
+cross-fades to content with no layout shift. When detection used the rule-based
+path, a green "Rule-based compile — no model call" badge replaces the model badge.
 
-Category filter chips and KPI cards stay above the split.
+## 3. Template X-ray
 
-## Token editor (WordPad-style)
+New `src/components/template-xray.tsx` used by the template preview: a toggle
+that staggers coloured overlays (20ms apart, ~400ms glow settle) onto classified
+runs, one scan-line sweep on activation, a glass hover tooltip with field name /
+type / governing condition, and a legend of live counts whose chips filter by
+dimming everything else.
 
-New component `src/components/template-editor.tsx`, mounted inside the Templates route (not a separate URL).
+## 4. Mapping agent (Document Mapping screen)
 
-Layout:
+In `src/routes/_app.projects.$id.mapping.$draftId.tsx`:
+- Agent trace panel streaming the four real loop steps while proposals load,
+  same request-driven/capped rule as §2.
+- SVG connectors from each field to its matched column, path-length draw,
+  staggered 40ms; weight/style/colour encode the existing confidence band
+  (auto-accept solid confident, confirm solid medium, review dashed pulsing
+  uncertain, blocked thick static).
+- Confidence badges count up while a radial progress ring fills.
+- Override: old connector detaches and fades, new draws in over 200ms, with an
+  inline note when the mapping memory previously rejected that column.
+- Unmatched values shake once then hold a slow pulse until acknowledged.
 
-```text
-┌ Toolbar ────────────────────────────────────────────────────┐
-│ B  I  U  •  1.  H1 H2  |  [+ Static] [+ Source] [+ Prompt]  │
-│                              [+ If] [+ Repeat]  |  Undo Redo│
-├ Editable canvas (contentEditable, TipTap) ──────────────────┤
-│  Dear <blue:full_name>,                                     │
-│  We are pleased to offer you the position of                │
-│  <blue:role> starting <blue:start_date>.                    │
-│  <red: Write a warm 2-sentence welcome paragraph…>          │
-│  <green if region=="EU"> GDPR clause … </green>             │
-│  <purple foreach benefit in benefits> • {benefit} </purple> │
-├ Legend + Inspector (right sidebar inside pane) ─────────────┤
-│  Selected token: Source Value                               │
-│    Field: [full_name ▾]   Fallback: [____]                  │
-└─────────────────────────────────────────────────────────────┘
-```
+## 5. Generation — canary gate and batch stream
 
-Details:
-- Built on the existing TipTap stack. Each token type is a custom inline (or block, for If/Repeat) TipTap node with `data-token-type` and its own attributes.
-- Token nodes render with the assigned color, a subtle rounded background, and a small type-glyph on the left ({}, ⚡, ⌥, ↻). Colors go through semantic tokens in `src/styles.css` (add `--token-source`, `--token-prompt`, `--token-conditional`, `--token-repeat`) so both themes look correct.
-- Toolbar buttons insert a token at the caret. Clicking a token opens the right-side Inspector to edit its attributes (source field dropdown, prompt text, condition expression, loop variable + collection).
-- Text formatting (bold/italic/underline, lists, H1–H3), undo/redo, keyboard shortcuts — reuse the setup from `_app.projects.$id.edit.$docId.tsx`.
-- Live legend under the toolbar so users know what each color means.
+In the project Drafts/Generation stage: three canary cards flipping
+Rendering → Verifying → Passed/Failed with each QA check ticking in
+individually, then a gate graphic animating open before the batch. Batch rows
+stream in as they complete with spring progress, a throughput counter only if
+timing data exists, failures sliding in with a vertically drawing red border and
+no auto-dismiss, and a "0 model calls · deterministic" badge on the header.
+Copy stays "Rendering / Verifying / QA".
 
-## Import existing templates (both flows)
+## 6. Enterprise surfaces
 
-An **Import** button on the left rail opens a dialog with two tabs:
+- Lineage toggle on generated documents: staggered connector draws from each
+  value back to its source cell and from each block to its deciding condition.
+- Audit log: timeline with a drawing spine, grouped by actor, hash-chained
+  entry appearance.
+- Always-visible model boundary chip (provider · residency · zero-retention) in
+  the app shell header, pulsing during an active call.
+- Blocked documents: download button shows a lock visibly engaging and names the
+  failing check.
+- Analytics: Recharts lines draw on mount, bars grow from baseline, figures tick
+  up, 60ms stagger.
 
-1. **Upload .docx** — file input, calls `document--parse_document` server-side, returns HTML + plain text. An "Auto-detect tokens" pass runs a lightweight heuristic (regex for `{placeholder}`, `[BRACKETED]`, `<<merge>>` patterns → Source Value; TODO/`[AI: …]` markers → Prompt) and then offers AI suggestions for the rest. User accepts/edits before saving.
-2. **Paste text** — textarea; user pastes, then in the editor highlights a span and clicks a token button to convert it. No auto-detect.
+## 7. Editor micro-interactions
 
-Both paths land in the same token editor so the user can refine before saving.
+Floating glass bubble toolbar on selection in the TipTap template editor (fade +
+4px rise, 150ms, repositions on scroll, Escape/outside-click dismiss) exposing
+existing token actions; token chips lift 1px on hover and scale-in from 0.9 on
+insert; a ⌘K command palette (cmdk, already installed) over existing routes and
+actions with blur-in backdrop, spring scale from 0.96, 20ms result stagger.
 
-## Data model (store)
+## Constraints honoured
 
-Extend `src/lib/store.ts`:
-
-```ts
-type TokenType = "static" | "source" | "prompt" | "conditional" | "repeat";
-type TemplateBlock = {
-  id: string;
-  content: string;                // token editor HTML (TipTap JSON serialized)
-  updatedAt: string;
-};
-// add to Template: blocks?: TemplateBlock; sourceFields?: string[]
-```
-
-New store actions: `upsertTemplateContent(templateId, html)`, `createTemplate(name, category)`, `importTemplateFromText(name, category, html)`. Existing dummy templates gain a small default `blocks.content` so the editor isn't empty when opened.
-
-## Out of scope for this pass
-
-- Actually calling the LLM at generate-time (the mapping wizard already stubs generation; token-aware generation is a follow-up).
-- Version history UI beyond the existing `version` string.
-- Multi-user real-time editing.
-
-## Technical notes
-
-- Reuse `@tiptap/react` + `@tiptap/starter-kit` already installed. Add custom nodes via `Node.create({ name: "sourceToken", inline: true, atom: true, addAttributes: …, parseHTML: …, renderHTML: … })`.
-- Persist content as HTML in the Zustand store (localStorage-backed) so it survives reloads like existing draft docs.
-- No new routes — everything stays under `/templates`. Deep-linking a specific template can use a `?t=<id>` search param on the route.
-- Keep all colors as CSS variables; never hardcode hex.
+No API/store/route/prop shape changes, no new backend logic, no invented values,
+no new localStorage, transform/opacity-only animation, and nothing that outlives
+a real request.
