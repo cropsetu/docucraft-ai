@@ -549,6 +549,9 @@ function Step4Drafts({ project }: { project: any }) {
 /* ------------------ Step 5 ------------------ */
 function Step5Generated({ project }: { project: any }) {
   const count = project.generated.length;
+  const approvals = useStore((s) => s.docApproved);
+  const approvedCount = project.generated.filter((g: any) => approvals[g.id]).length;
+  const shown = useCountUp(count, 600, count > 0);
   return (
     <StepCard
       n={5}
@@ -566,34 +569,95 @@ function Step5Generated({ project }: { project: any }) {
           subtitle="Complete a mapping to generate documents."
         />
       ) : (
-        <div className="space-y-2">
-          {project.generated.map((g: any) => (
-            <div key={g.id} className="flex items-center gap-3 rounded-lg border border-border bg-background/40 p-3">
-              <FileText className="h-5 w-5 text-brand" />
-              <div className="flex-1 min-w-0">
-                <div className="font-medium text-sm truncate">{g.filename}</div>
-                <div className="text-xs text-muted-foreground">
-                  Generated from {g.fromDraft} · {g.generatedAt} · {g.size} · by {g.generatedBy}
-                </div>
-              </div>
-              <button className="p-1.5 rounded hover:bg-accent text-muted-foreground" title="Preview"><Eye className="h-4 w-4" /></button>
-              <button className="p-1.5 rounded hover:bg-accent text-muted-foreground" title="Download"><Download className="h-4 w-4" /></button>
-              <Link
-                to="/projects/$id/edit/$docId"
-                params={{ id: project.id, docId: g.id }}
-                className="p-1.5 rounded hover:bg-accent text-muted-foreground"
-                title="Edit"
-              >
-                <Pencil className="h-4 w-4" />
-              </Link>
-              <button className="p-1.5 rounded hover:bg-accent text-muted-foreground" title="Regenerate"><RefreshCcw className="h-4 w-4" /></button>
-            </div>
-          ))}
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+            <span className="tabular-nums">{Math.round(shown)} rendered</span>
+            <span className="text-border">|</span>
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 tabular-nums",
+                approvedCount === count ? "text-ai-confident" : "text-ai-uncertain",
+              )}
+            >
+              {approvedCount === count ? (
+                <Unlock className="h-3.5 w-3.5" />
+              ) : (
+                <Lock className="h-3.5 w-3.5" />
+              )}
+              {approvedCount}/{count} approved
+            </span>
+            {approvedCount < count && <span>Batch stays locked until every document is approved.</span>}
+          </div>
+          <motion.div
+            className="relative space-y-2 pl-4"
+            variants={listContainer(0.05)}
+            initial="hidden"
+            animate="show"
+          >
+            {/* lineage rail: mapping → render → approval */}
+            <span className="absolute bottom-2 left-0 top-2 w-px bg-border" aria-hidden />
+            {project.generated.map((g: any, i: number) => {
+              const approved = !!approvals[g.id];
+              return (
+                <motion.div
+                  key={g.id}
+                  variants={listItem}
+                  className="relative flex items-center gap-3 rounded-lg border border-border bg-background/40 p-3"
+                >
+                  <span
+                    className={cn(
+                      "absolute -left-4 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full",
+                      approved ? "bg-ai-confident" : "bg-ai-uncertain",
+                    )}
+                    aria-hidden
+                  />
+                  <FileText className="h-5 w-5 text-brand" />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <div className="truncate text-sm font-medium">{g.filename}</div>
+                      {i === 0 && (
+                        <span className="shrink-0 rounded-full border border-ai-active/40 bg-ai-active/10 px-1.5 py-0.5 text-[10px] font-medium text-ai-active">
+                          first of batch
+                        </span>
+                      )}
+                      <span
+                        className={cn(
+                          "inline-flex shrink-0 items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-medium",
+                          approved
+                            ? "border-ai-confident/40 bg-ai-confident/10 text-ai-confident"
+                            : "border-border bg-muted text-muted-foreground",
+                        )}
+                      >
+                        {approved ? <Unlock className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+                        {approved ? "Approved" : "Awaiting approval"}
+                      </span>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Mapped from {g.fromDraft} → rendered {g.generatedAt} · {g.size} · by{" "}
+                      {g.generatedBy}
+                    </div>
+                  </div>
+                  <button className="rounded p-1.5 text-muted-foreground hover:bg-accent" title="Preview"><Eye className="h-4 w-4" /></button>
+                  <button className="rounded p-1.5 text-muted-foreground hover:bg-accent" title="Download"><Download className="h-4 w-4" /></button>
+                  <Link
+                    to="/projects/$id/edit/$docId"
+                    params={{ id: project.id, docId: g.id }}
+                    className="rounded p-1.5 text-muted-foreground hover:bg-accent"
+                    title="Edit"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Link>
+                  <button className="rounded p-1.5 text-muted-foreground hover:bg-accent" title="Regenerate"><RefreshCcw className="h-4 w-4" /></button>
+                </motion.div>
+              );
+            })}
+          </motion.div>
         </div>
       )}
     </StepCard>
   );
 }
+
 
 /* ------------------ Shared ------------------ */
 function EmptyState({
