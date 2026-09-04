@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { TrendingUp, TrendingDown, FileText, Zap, Clock, CheckCircle2 } from "lucide-react";
+import { motion } from "framer-motion";
+import { DUR, EASE, staggerDelay, listContainer, listItem } from "@/lib/motion";
 
 export const Route = createFileRoute("/_app/analytics")({
   head: () => ({ meta: [{ title: "Analytics — DocuMind AI" }, { name: "description", content: "Usage analytics and KPIs." }] }),
@@ -94,10 +96,17 @@ function AnalyticsPage() {
           </div>
           <div className="h-56 mt-6 flex items-end gap-2">
             {TREND.map((v, i) => (
-              <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
-                <div
-                  className="w-full rounded-t-md bg-gradient-to-t from-primary to-purple-500 hover:opacity-80 transition-opacity"
+              <div key={i} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
+                <motion.div
+                  className="w-full rounded-t-md bg-gradient-to-t from-primary to-purple-500 hover:opacity-80 transition-opacity origin-bottom"
                   style={{ height: `${(v / max) * 100}%` }}
+                  initial={{ scaleY: 0, opacity: 0.4 }}
+                  animate={{ scaleY: 1, opacity: 1 }}
+                  transition={{
+                    duration: DUR.reveal,
+                    ease: EASE.out,
+                    delay: staggerDelay(i, 0.035),
+                  }}
                   title={`${v} docs`}
                 />
                 <div className="text-[10px] text-muted-foreground">{i + 10}</div>
@@ -110,14 +119,24 @@ function AnalyticsPage() {
           <h2 className="font-semibold">By function</h2>
           <p className="text-xs text-muted-foreground">Distribution this month</p>
           <div className="space-y-4 mt-5">
-            {BY_FUNCTION.map((f) => (
+            {BY_FUNCTION.map((f, i) => (
               <div key={f.name}>
                 <div className="flex items-center justify-between text-sm">
                   <span className="truncate">{f.name}</span>
                   <span className="text-muted-foreground tabular-nums">{f.value}</span>
                 </div>
                 <div className="mt-1.5 h-2 rounded-full bg-muted overflow-hidden">
-                  <div className={`h-full ${f.color}`} style={{ width: `${f.pct * 3}%` }} />
+                  <motion.div
+                    className={`h-full ${f.color} origin-left`}
+                    style={{ width: `${f.pct * 3}%` }}
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{
+                      duration: DUR.revealSlow,
+                      ease: EASE.out,
+                      delay: staggerDelay(i, 0.05),
+                    }}
+                  />
                 </div>
               </div>
             ))}
@@ -130,9 +149,14 @@ function AnalyticsPage() {
           <h2 className="font-semibold">Top templates</h2>
           <p className="text-xs text-muted-foreground">Ranked by usage this month</p>
         </div>
-        <div className="divide-y divide-border">
+        <motion.div
+          className="divide-y divide-border"
+          variants={listContainer(0.04)}
+          initial="hidden"
+          animate="show"
+        >
           {TOP_TEMPLATES.map((t, i) => (
-            <div key={t.name} className="p-4 flex items-center gap-4">
+            <motion.div key={t.name} variants={listItem} className="p-4 flex items-center gap-4">
               <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground">
                 {i + 1}
               </div>
@@ -141,9 +165,9 @@ function AnalyticsPage() {
                 <div className="text-xs text-muted-foreground">{t.uses} generations</div>
               </div>
               <span className="text-xs font-medium text-emerald-500">{t.growth}</span>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { MappingBinder } from "@/components/mapping-binder";
 import {
   ChevronRight,
   ChevronDown,
@@ -258,35 +259,21 @@ function MappingPage() {
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-2">
+                <div className="mb-2">
                   <Label>Map source fields → template variables</Label>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      const auto: Record<string, string> = {};
-                      TEMPLATE_VARS.forEach((v, i) => (auto[v] = SOURCE_FIELDS[i] ?? ""));
-                      setMappings(auto);
-                      toast.success("AI auto-mapped fields");
-                    }}
-                  >
-                    <Sparkles className="h-3.5 w-3.5 mr-1.5" /> Auto-map with AI
-                  </Button>
                 </div>
-                <div className="rounded-lg border border-border divide-y divide-border">
-                  {TEMPLATE_VARS.map((v) => (
-                    <div key={v} className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 p-3">
-                      <code className="text-sm font-mono text-brand">{v}</code>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                      <Select value={mappings[v] ?? ""} onValueChange={(val) => setMappings({ ...mappings, [v]: val })}>
-                        <SelectTrigger><SelectValue placeholder="Select field" /></SelectTrigger>
-                        <SelectContent>
-                          {SOURCE_FIELDS.map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  ))}
-                </div>
+                <MappingBinder
+                  variables={TEMPLATE_VARS}
+                  fields={SOURCE_FIELDS}
+                  mappings={mappings}
+                  onChange={setMappings}
+                  onAutoMap={() => {
+                    const auto: Record<string, string> = {};
+                    TEMPLATE_VARS.forEach((v, i) => (auto[v] = SOURCE_FIELDS[i] ?? ""));
+                    toast.success("AI auto-mapped fields");
+                    return auto;
+                  }}
+                />
               </div>
             </div>
           )}

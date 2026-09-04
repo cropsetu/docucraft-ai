@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { CompileReveal } from "@/components/compile-reveal";
 
 type Props = {
   open: boolean;
@@ -400,6 +401,27 @@ export function TemplateConversionWizard({ open, onOpenChange, onFinish }: Props
                   ))}
                 </div>
               </div>
+
+              <CompileReveal
+                key={preset}
+                done
+                stages={[
+                  "Reading document text",
+                  "Classifying runs (static, placeholder, instruction)",
+                  "Extracting field candidates",
+                  "Compiling into token rules",
+                ]}
+                counts={[
+                  { label: "candidates", value: stats.total, tone: "text-foreground" },
+                  { label: "source fields", value: stats.source, tone: "text-token-source" },
+                  { label: "prompts", value: stats.prompt, tone: "text-token-prompt" },
+                  {
+                    label: "logic blocks",
+                    value: stats.conditional + stats.repeat,
+                    tone: "text-token-conditional",
+                  },
+                ]}
+              />
 
               <div className="rounded-lg border border-info/30 bg-info/10 p-3 text-sm flex items-start gap-2">
                 <Sparkles className="h-4 w-4 text-info mt-0.5 shrink-0" />

@@ -54,6 +54,18 @@
   --color-token-conditional: var(--token-conditional);
   --color-token-repeat: var(--token-repeat);
 
+  /* intelligence ramp — every AI-related surface pulls from these */
+  --color-ai-idle: var(--ai-idle);
+  --color-ai-active: var(--ai-active);
+  --color-ai-confident: var(--ai-confident);
+  --color-ai-uncertain: var(--ai-uncertain);
+  --color-ai-blocked: var(--ai-blocked);
+
+  /* classified document runs */
+  --color-run-placeholder: var(--run-placeholder);
+  --color-run-instruction: var(--run-instruction);
+  --color-run-mergefield: var(--run-mergefield);
+
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -109,6 +121,22 @@
   --token-prompt: oklch(0.7 0.2 20);
   --token-conditional: oklch(0.72 0.17 160);
   --token-repeat: oklch(0.7 0.22 300);
+
+  /* intelligence ramp (dark) */
+  --ai-idle: oklch(0.55 0.02 270);
+  --ai-active: oklch(0.7 0.19 268);
+  --ai-confident: oklch(0.74 0.17 162);
+  --ai-uncertain: oklch(0.8 0.16 78);
+  --ai-blocked: oklch(0.66 0.23 25);
+
+  /* classified runs (dark) */
+  --run-placeholder: oklch(0.72 0.17 240);
+  --run-instruction: oklch(0.7 0.2 20);
+  --run-mergefield: oklch(0.72 0.2 300);
+
+  --selection: oklch(0.66 0.19 268 / 0.34);
+  --selection-doc: oklch(0.72 0.2 300 / 0.3);
+
 
   --border: oklch(0.26 0.02 270);
   --border-strong: oklch(0.34 0.025 270);
@@ -168,6 +196,22 @@
   --token-prompt: oklch(0.55 0.22 22);
   --token-conditional: oklch(0.5 0.15 160);
   --token-repeat: oklch(0.5 0.22 300);
+
+  /* intelligence ramp (light) */
+  --ai-idle: oklch(0.62 0.015 270);
+  --ai-active: oklch(0.55 0.2 268);
+  --ai-confident: oklch(0.52 0.15 162);
+  --ai-uncertain: oklch(0.6 0.14 62);
+  --ai-blocked: oklch(0.55 0.22 25);
+
+  /* classified runs (light) */
+  --run-placeholder: oklch(0.5 0.18 240);
+  --run-instruction: oklch(0.55 0.22 22);
+  --run-mergefield: oklch(0.5 0.22 300);
+
+  --selection: oklch(0.55 0.2 268 / 0.2);
+  --selection-doc: oklch(0.5 0.22 300 / 0.18);
+
 
   --border: oklch(0.9 0.008 260);
   --border-strong: oklch(0.82 0.01 260);
@@ -272,4 +316,198 @@
     radial-gradient(circle at 15% 20%, oklch(0.7 0.18 268 / 0.18), transparent 45%),
     radial-gradient(circle at 85% 30%, oklch(0.72 0.2 300 / 0.16), transparent 50%),
     radial-gradient(circle at 50% 90%, oklch(0.72 0.18 340 / 0.14), transparent 55%);
+}
+
+/* ============================================================================
+   Ambient atmosphere — aurora orbs + grain.
+   Transform-only keyframes on composited layers (no layout/paint per frame).
+   ========================================================================== */
+
+.aurora-orb {
+  position: absolute;
+  width: 46rem;
+  height: 46rem;
+  border-radius: 9999px;
+  filter: blur(90px);
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  opacity: 0.5;
+}
+
+.aurora-orb-1 {
+  top: -14rem;
+  left: -10rem;
+  background: radial-gradient(circle, var(--ai-active), transparent 68%);
+  animation: aurora-drift-1 26s ease-in-out infinite alternate;
+}
+.aurora-orb-2 {
+  top: 20%;
+  right: -16rem;
+  background: radial-gradient(circle, var(--purple-accent), transparent 68%);
+  animation: aurora-drift-2 30s ease-in-out infinite alternate;
+  opacity: 0.4;
+}
+.aurora-orb-3 {
+  bottom: -20rem;
+  left: 30%;
+  background: radial-gradient(circle, var(--ai-confident), transparent 70%);
+  animation: aurora-drift-3 24s ease-in-out infinite alternate;
+  opacity: 0.28;
+}
+
+.light .aurora-orb-1 { opacity: 0.16; }
+.light .aurora-orb-2 { opacity: 0.13; }
+.light .aurora-orb-3 { opacity: 0.1; }
+
+@keyframes aurora-drift-1 {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(6rem, 4rem, 0) scale(1.12); }
+}
+@keyframes aurora-drift-2 {
+  from { transform: translate3d(0, 0, 0) scale(1.05); }
+  to { transform: translate3d(-5rem, 6rem, 0) scale(0.92); }
+}
+@keyframes aurora-drift-3 {
+  from { transform: translate3d(0, 0, 0) scale(0.95); }
+  to { transform: translate3d(4rem, -5rem, 0) scale(1.1); }
+}
+
+.grain-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='140' height='140' filter='url(%23n)' opacity='0.6'/></svg>");
+  background-repeat: repeat;
+}
+
+/* ============================================================================
+   Elevation — layered soft shadows + 1px low-alpha border, never heavy drops
+   ========================================================================== */
+
+@utility elev-1 {
+  border: 1px solid color-mix(in oklab, var(--color-border) 70%, transparent);
+  box-shadow:
+    0 1px 2px oklch(0 0 0 / 0.06),
+    0 4px 12px -6px oklch(0 0 0 / 0.14);
+}
+
+@utility elev-2 {
+  border: 1px solid color-mix(in oklab, var(--color-border) 80%, transparent);
+  box-shadow:
+    0 1px 2px oklch(0 0 0 / 0.08),
+    0 8px 24px -12px oklch(0 0 0 / 0.22),
+    0 24px 48px -32px oklch(0 0 0 / 0.28);
+}
+
+/* Glass is ONLY for overlays and floating toolbars */
+@utility glass-overlay {
+  background: color-mix(in oklab, var(--color-popover) 78%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid color-mix(in oklab, var(--color-border-strong) 60%, transparent);
+  box-shadow:
+    0 1px 2px oklch(0 0 0 / 0.1),
+    0 12px 32px -12px oklch(0 0 0 / 0.35);
+}
+
+/* ============================================================================
+   Intelligence-ramp states: focus, skeletons, pulses
+   ========================================================================== */
+
+@utility ai-ring {
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--ai-active) 45%, transparent),
+    0 0 18px -6px color-mix(in oklab, var(--ai-active) 55%, transparent);
+}
+
+@utility ai-skeleton {
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--ai-idle) 16%, transparent) 0%,
+    color-mix(in oklab, var(--ai-active) 22%, transparent) 50%,
+    color-mix(in oklab, var(--ai-idle) 16%, transparent) 100%
+  );
+  background-size: 200% 100%;
+  animation: ai-shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+
+@keyframes ai-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -40% 0; }
+}
+
+@utility ai-pulse-uncertain {
+  animation: ai-pulse-uncertain 2.4s ease-in-out infinite;
+}
+@keyframes ai-pulse-uncertain {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--ai-uncertain) 45%, transparent); }
+  50% { box-shadow: 0 0 0 4px color-mix(in oklab, var(--ai-uncertain) 0%, transparent); }
+}
+
+@utility ai-shake-once {
+  animation: ai-shake 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97) 1;
+}
+@keyframes ai-shake {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  20% { transform: translate3d(-5px, 0, 0); }
+  40% { transform: translate3d(4px, 0, 0); }
+  60% { transform: translate3d(-3px, 0, 0); }
+  80% { transform: translate3d(2px, 0, 0); }
+}
+
+@utility scan-sweep {
+  animation: scan-sweep 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+@keyframes scan-sweep {
+  from { transform: translate3d(0, -8%, 0); opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  to { transform: translate3d(0, 1000%, 0); opacity: 0; }
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px color-mix(in oklab, var(--ai-active) 70%, transparent),
+    0 0 16px -4px color-mix(in oklab, var(--ai-active) 60%, transparent);
+}
+
+/* ============================================================================
+   Text selection — app chrome vs structural document editor
+   ========================================================================== */
+
+::selection {
+  background: var(--selection);
+  color: var(--color-foreground);
+}
+::-moz-selection {
+  background: var(--selection);
+  color: var(--color-foreground);
+}
+
+.doc-surface ::selection,
+.doc-surface::selection {
+  background: var(--selection-doc);
+  color: var(--color-foreground);
+}
+.doc-surface ::-moz-selection {
+  background: var(--selection-doc);
+  color: var(--color-foreground);
+}
+
+/* ============================================================================
+   Reduced motion — global collapse to opacity-only. Not optional.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .aurora-orb {
+    animation: none !important;
+  }
 }

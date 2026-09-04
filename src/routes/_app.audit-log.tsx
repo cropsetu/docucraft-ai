@@ -3,6 +3,8 @@ import { Download, Filter, Search, FileText, UserCog, ShieldCheck, Trash2, Uploa
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import { DUR, EASE, staggerDelay } from "@/lib/motion";
 
 export const Route = createFileRoute("/_app/audit-log")({
   head: () => ({ meta: [{ title: "Audit Log — DocuMind AI" }, { name: "description", content: "Compliance-grade audit trail." }] }),
@@ -32,6 +34,13 @@ const sevTone: Record<Sev, string> = {
   success: "bg-emerald-500/10 text-emerald-500",
   warning: "bg-amber-500/10 text-amber-500",
   danger: "bg-red-500/10 text-red-500",
+};
+
+const sevDot: Record<Sev, string> = {
+  info: "bg-ai-active",
+  success: "bg-ai-confident",
+  warning: "bg-ai-uncertain",
+  danger: "bg-ai-blocked",
 };
 
 function AuditLogPage() {
@@ -83,8 +92,22 @@ function AuditLogPage() {
             </thead>
             <tbody className="divide-y divide-border">
               {ENTRIES.map((e, i) => (
-                <tr key={i} className="hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3 font-mono text-xs text-muted-foreground whitespace-nowrap">{e.time}</td>
+                <motion.tr
+                  key={i}
+                  className="hover:bg-muted/30 transition-colors"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: DUR.reveal, ease: EASE.out, delay: staggerDelay(i, 0.025) }}
+                >
+                  <td className="px-4 py-3 font-mono text-xs text-muted-foreground whitespace-nowrap">
+                    <span className="relative flex items-center gap-2">
+                      <span
+                        className={cn("h-1.5 w-1.5 shrink-0 rounded-full", sevDot[e.severity])}
+                        aria-hidden
+                      />
+                      {e.time}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 whitespace-nowrap">{e.actor}</td>
                   <td className="px-4 py-3">
                     <span className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium", sevTone[e.severity])}>
@@ -93,7 +116,7 @@ function AuditLogPage() {
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{e.target}</td>
                   <td className="px-4 py-3 font-mono text-xs text-muted-foreground whitespace-nowrap">{e.ip}</td>
-                </tr>
+                </motion.tr>
               ))}
             </tbody>
           </table>
