@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate, notFound, useRouter } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -940,4 +940,47 @@ function NetworkNodes() {
       <rect x="110" y="70" width="20" height="20" fill="oklch(0.5 0.05 275)" />
     </svg>
   );
+}
+
+interface StageErrorBoundaryProps {
+  stageKey: string;
+  stageTitle: string;
+  onRetry: () => void;
+  retrying: boolean;
+  children: React.ReactNode;
+}
+
+class StageErrorBoundary extends React.Component<
+  StageErrorBoundaryProps,
+  { error: Error | null }
+> {
+  state = { error: null as Error | null };
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  componentDidUpdate(prev: StageErrorBoundaryProps) {
+    if (prev.stageKey !== this.props.stageKey && this.state.error) {
+      this.setState({ error: null });
+    }
+  }
+
+  render() {
+    if (this.state.error) {
+      return (
+        <ErrorBanner
+          title={`Couldn't load the ${this.props.stageTitle} stage`}
+          message="This stage failed to load its data. Retry, or move to another stage and come back."
+          detail={this.state.error.message}
+          retrying={this.props.retrying}
+          onRetry={() => {
+            this.setState({ error: null });
+            this.props.onRetry();
+          }}
+        />
+      );
+    }
+    return this.props.children;
+  }
 }
