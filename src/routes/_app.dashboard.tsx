@@ -7,6 +7,7 @@ import { TableSkeleton, PolishedEmpty } from "@/components/skeletons";
 import { ErrorBanner } from "@/components/error-banner";
 import { motion, AnimatePresence } from "framer-motion";
 import { DUR, EASE, staggerDelay } from "@/lib/motion";
+import aiDocumentHero from "@/assets/ai-document-hero.png";
 import {
   Search,
   Filter,
