@@ -4,7 +4,8 @@ import { useStore, FUNCTION_COLORS } from "@/lib/store";
 import { StatusBadge } from "@/components/status-badge";
 import { CreateProjectSheet } from "@/components/create-project-sheet";
 import { TableSkeleton, PolishedEmpty } from "@/components/skeletons";
-import { motion } from "framer-motion";
+import { ErrorBanner } from "@/components/error-banner";
+import { motion, AnimatePresence } from "framer-motion";
 import { DUR, EASE, staggerDelay } from "@/lib/motion";
 import {
   Search,
@@ -18,8 +19,12 @@ import {
   FolderOpen,
   ChevronLeft,
   ChevronRight,
+  ArrowUp,
+  ArrowDown,
+  ChevronsUpDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
 
 
 export const Route = createFileRoute("/_app/dashboard")({
