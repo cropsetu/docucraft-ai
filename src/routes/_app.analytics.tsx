@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { TrendingUp, TrendingDown, FileText, Zap, Clock, CheckCircle2 } from "lucide-react";
+import { motion } from "framer-motion";
+import { DUR, EASE, staggerDelay, listContainer, listItem } from "@/lib/motion";
 
 export const Route = createFileRoute("/_app/analytics")({
   head: () => ({ meta: [{ title: "Analytics — DocuMind AI" }, { name: "description", content: "Usage analytics and KPIs." }] }),
