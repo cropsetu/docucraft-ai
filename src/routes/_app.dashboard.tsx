@@ -148,21 +148,37 @@ function Dashboard() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: DUR.reveal, ease: EASE.out }}
-        className="relative overflow-hidden rounded-2xl bg-surface p-8 md:p-10 elev-1"
+        className="relative overflow-hidden rounded-3xl bg-surface p-8 md:p-10 elev-1 border border-border/60"
       >
-        <div className="absolute inset-0 bg-hero-orbs opacity-70 pointer-events-none" />
+        <div className="absolute inset-0 bg-hero-orbs opacity-80 pointer-events-none" />
+        <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-brand/10 blur-[80px] pointer-events-none" />
+        <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-run-success/10 blur-[70px] pointer-events-none" />
         <div className="relative grid md:grid-cols-[1fr_auto] gap-8 items-center">
-          <div>
-            <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand ai-pulse-uncertain" />
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-surface-elevated/70 px-3 py-1.5 text-[11px] font-mono uppercase tracking-[0.12em] text-muted-foreground backdrop-blur-sm">
+              <span className="inline-block h-2 w-2 rounded-full bg-brand ai-pulse-uncertain" />
               Workspace
             </div>
-            <h1 className="mt-2 text-[2rem] md:text-[2.75rem] leading-[1.08] font-bold tracking-tight text-gradient">
-              Welcome, {firstName}
+            <h1 className="mt-4 text-[2.25rem] md:text-[3.25rem] leading-[1.05] font-bold tracking-tight text-gradient">
+              Welcome back, {firstName}
             </h1>
-            <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground max-w-xl">
-              Create and manage AI-assisted document generation projects from a single workspace.
+            <p className="mt-4 text-[15px] md:text-base leading-relaxed text-muted-foreground max-w-xl">
+              Create and manage AI-assisted document generation projects from a single workspace. Your documents, templates, and team are all here.
             </p>
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => setCreateOpen(true)}
+                className="h-10 inline-flex items-center gap-2 rounded-xl bg-gradient-brand text-white px-5 text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-brand/20"
+              >
+                <Plus className="h-4 w-4" /> New project
+              </button>
+              <Link
+                to="/templates"
+                className="h-10 inline-flex items-center gap-2 rounded-xl border border-border bg-surface-elevated/60 px-5 text-sm font-medium text-foreground hover:bg-accent hover:border-border-strong transition-colors"
+              >
+                <FileText className="h-4 w-4 text-muted-foreground" /> Browse templates
+              </Link>
+            </div>
           </div>
           <WelcomeIllustration />
         </div>
