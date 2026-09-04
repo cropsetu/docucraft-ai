@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
@@ -137,6 +138,8 @@ export function TemplateEditor({ templateId, templateName, initialHtml, onSaved 
   );
 
   const [dirty, setDirty] = useState(false);
+  const [xray, setXray] = useState(false);
+  const [focus, setFocus] = useState<null | "static" | "source" | "prompt" | "conditional" | "repeat">(null);
   const [selection, setSelection] = useState<null | {
     type: "source" | "prompt" | "conditional" | "repeat";
     attrs: Record<string, any>;
@@ -322,6 +325,15 @@ export function TemplateEditor({ templateId, templateName, initialHtml, onSaved 
 
 
       <style>{`
+        .tpl-xray [data-token] { outline: 1px dashed color-mix(in oklab, currentColor 55%, transparent); outline-offset: 2px; border-radius: 3px; }
+        .tpl-xray[data-focus] [data-token] { opacity: 0.2; transition: opacity 180ms ease; }
+        .tpl-xray[data-focus="source"] [data-token="source"],
+        .tpl-xray[data-focus="prompt"] [data-token="prompt"],
+        .tpl-xray[data-focus="conditional"] [data-token="conditional"],
+        .tpl-xray[data-focus="repeat"] [data-token="repeat"] { opacity: 1; }
+        .tpl-xray[data-focus="static"] [data-token] { opacity: 0.15; }
+        .tpl-editor [data-token] { transition: box-shadow 160ms ease, opacity 180ms ease; }
+        .tpl-editor [data-token]:hover { box-shadow: 0 0 0 2px color-mix(in oklab, currentColor 30%, transparent); }
         .tpl-editor h1 { font-size: 1.75rem; font-weight: 700; line-height: 1.2; margin: 1rem 0 0.6rem; letter-spacing: -0.01em; }
         .tpl-editor h2 { font-size: 1.35rem; font-weight: 600; margin: 1rem 0 0.4rem; }
         .tpl-editor h3 { font-size: 1.1rem; font-weight: 600; margin: 0.8rem 0 0.3rem; }
