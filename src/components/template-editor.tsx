@@ -248,25 +248,67 @@ export function TemplateEditor({ templateId, templateName, initialHtml, onSaved 
       {/* Toolbar */}
       <Toolbar editor={editor} onInsertToken={insertToken} />
 
-      {/* Legend */}
-      <div className="px-5 py-2 border-b border-border bg-surface/40 flex flex-wrap items-center gap-3 text-xs">
-        <span className="text-muted-foreground font-medium">Legend:</span>
+      {/* Legend / X-ray filters */}
+      <div className="px-5 py-2 border-b border-border bg-surface/40 flex flex-wrap items-center gap-2 text-xs">
+        <span className="text-muted-foreground font-medium mr-1">Legend:</span>
         {(["static", "source", "prompt", "conditional", "repeat"] as const).map((k) => (
-          <span key={k} className="inline-flex items-center gap-1.5">
+          <button
+            key={k}
+            type="button"
+            onClick={() => setFocus((f) => (f === k ? null : k))}
+            title={focus === k ? "Show all token types" : `Isolate ${TOKEN_COLORS[k].label}`}
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 transition-colors",
+              focus === k
+                ? "border-border-strong bg-surface-elevated text-foreground"
+                : "border-transparent text-muted-foreground hover:bg-accent/60",
+            )}
+          >
             <span
               className="inline-block h-2.5 w-2.5 rounded-sm"
               style={{ background: `var(${TOKEN_COLORS[k].var})` }}
             />
-            <span className="text-muted-foreground">{TOKEN_COLORS[k].label}</span>
-          </span>
+            <span>{TOKEN_COLORS[k].label}</span>
+          </button>
         ))}
+        <button
+          type="button"
+          onClick={() => setXray((v) => !v)}
+          title="Outline every token in place"
+          className={cn(
+            "ml-auto inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 transition-colors",
+            xray
+              ? "border-brand/50 bg-brand/15 text-foreground"
+              : "border-border text-muted-foreground hover:bg-accent/60",
+          )}
+        >
+          X-ray {xray ? "on" : "off"}
+        </button>
       </div>
 
       {/* Canvas + Inspector */}
       <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[1fr_320px] overflow-hidden">
         <div className="overflow-auto bg-background">
-          <div className="max-w-3xl mx-auto my-6 rounded-xl border border-border bg-surface shadow-sm">
-            <div className="px-10 py-10">
+          <div className="relative max-w-3xl mx-auto my-6 rounded-xl border border-border bg-surface shadow-sm overflow-hidden">
+            <AnimatePresence>
+              {xray && (
+                <motion.div
+                  className="pointer-events-none absolute inset-x-0 top-0 h-24 z-10"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, transparent, color-mix(in oklab, var(--color-brand) 22%, transparent), transparent)",
+                  }}
+                  initial={{ y: -100, opacity: 0 }}
+                  animate={{ y: ["-6rem", "100%"], opacity: [0, 1, 0] }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.9, ease: "easeInOut" }}
+                />
+              )}
+            </AnimatePresence>
+            <div
+              className={cn("px-10 py-10", xray && "tpl-xray")}
+              data-focus={focus ?? undefined}
+            >
               <EditorContent editor={editor} />
             </div>
           </div>
@@ -277,6 +319,7 @@ export function TemplateEditor({ templateId, templateName, initialHtml, onSaved 
           onDelete={deleteSelected}
         />
       </div>
+
 
       <style>{`
         .tpl-editor h1 { font-size: 1.75rem; font-weight: 700; line-height: 1.2; margin: 1rem 0 0.6rem; letter-spacing: -0.01em; }
