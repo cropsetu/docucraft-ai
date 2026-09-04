@@ -3,7 +3,6 @@ import { ShieldCheck, Cpu } from "lucide-react";
 import { useModelCallActive } from "@/lib/model-activity";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { DUR } from "@/lib/motion";
 
 /** Workspace region → data-residency label. */
 function residency(region: string) {
@@ -31,8 +30,8 @@ export function ModelBoundaryChip({ className }: { className?: string }) {
       )}
       title={
         active
-          ? `Model call in flight · residency ${zone} · zero retention`
-          : `No model call in flight · residency ${zone} · zero retention`
+          ? `Model call in flight · workspace region ${region}`
+          : `No model call in flight · workspace region ${region}`
       }
     >
       <span className="relative flex h-2 w-2 items-center justify-center">
@@ -57,14 +56,6 @@ export function ModelBoundaryChip({ className }: { className?: string }) {
       <span className="text-border">|</span>
       <span className="tabular-nums">{zone}</span>
       <ShieldCheck className="h-3.5 w-3.5 text-ai-confident" />
-      <motion.span
-        className="text-muted-foreground"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: DUR.base }}
-      >
-        0-retention
-      </motion.span>
     </div>
   );
 }
