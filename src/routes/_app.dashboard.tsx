@@ -381,19 +381,24 @@ function Dashboard() {
                     <td colSpan={8} className="p-6">
                       <PolishedEmpty
                         icon={<FolderOpen className="h-6 w-6" />}
-                        title={search ? "No matching projects" : "No projects yet"}
+                        title={
+                          search || activeFilterCount > 0 ? "No matching projects" : "No projects yet"
+                        }
                         subtitle={
-                          search
-                            ? "Try a different name, ID, document type, or function."
+                          search || activeFilterCount > 0
+                            ? "Try a different search, or widen the status, category, and updated-time filters."
                             : "Create your first project to start generating documents from your templates and sources."
                         }
                         action={
-                          search ? (
+                          search || activeFilterCount > 0 ? (
                             <button
-                              onClick={() => setSearch("")}
+                              onClick={() => {
+                                setSearch("");
+                                resetFilters();
+                              }}
                               className="h-9 rounded-lg border border-border bg-surface px-4 text-sm hover:bg-accent transition-colors"
                             >
-                              Clear search
+                              Reset search and filters
                             </button>
                           ) : (
                             <button
@@ -409,6 +414,7 @@ function Dashboard() {
                     </td>
                   </tr>
                 )}
+
               </tbody>
               )}
             </table>
