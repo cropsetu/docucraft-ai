@@ -100,12 +100,12 @@ function ProjectDetail() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: DUR.reveal, ease: EASE.out }}
-        className="rounded-2xl border border-border bg-surface overflow-hidden elevated"
+        className="rounded-2xl border border-border bg-surface overflow-hidden elev-1"
       >
         <div className="p-6 flex items-start justify-between gap-4 flex-wrap">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand ai-pulse" />
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand ai-pulse-uncertain" />
               {project.projectId} · {project.region} · {project.function}
             </div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight mt-1.5">{project.name}</h1>
@@ -143,7 +143,7 @@ function ProjectDetail() {
       <PipelineRail stages={STAGES} done={done} active={active} onSelect={setActive} />
 
       {/* Active stage panel */}
-      <div className="rounded-2xl border border-border bg-surface elevated">
+      <div className="rounded-2xl border border-border bg-surface elev-1">
         <div className="flex items-center gap-4 p-6 border-b border-border">
           <motion.div
             key={active}
@@ -213,7 +213,7 @@ function PipelineRail({
   onSelect: (k: StageKey) => void;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-surface p-4 elevated">
+    <div className="rounded-2xl border border-border bg-surface p-4 elev-1">
       <div className="grid grid-cols-5 gap-3 relative">
         {stages.map((s, i) => {
           const isActive = active === s.key;
