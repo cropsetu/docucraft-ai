@@ -148,21 +148,37 @@ function Dashboard() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: DUR.reveal, ease: EASE.out }}
-        className="relative overflow-hidden rounded-2xl bg-surface p-8 md:p-10 elev-1"
+        className="relative overflow-hidden rounded-3xl bg-surface p-8 md:p-10 elev-1 border border-border/60"
       >
-        <div className="absolute inset-0 bg-hero-orbs opacity-70 pointer-events-none" />
+        <div className="absolute inset-0 bg-hero-orbs opacity-80 pointer-events-none" />
+        <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-brand/10 blur-[80px] pointer-events-none" />
+        <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-run-success/10 blur-[70px] pointer-events-none" />
         <div className="relative grid md:grid-cols-[1fr_auto] gap-8 items-center">
-          <div>
-            <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand ai-pulse-uncertain" />
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-surface-elevated/70 px-3 py-1.5 text-[11px] font-mono uppercase tracking-[0.12em] text-muted-foreground backdrop-blur-sm">
+              <span className="inline-block h-2 w-2 rounded-full bg-brand ai-pulse-uncertain" />
               Workspace
             </div>
-            <h1 className="mt-2 text-[2rem] md:text-[2.75rem] leading-[1.08] font-bold tracking-tight text-gradient">
-              Welcome, {firstName}
+            <h1 className="mt-4 text-[2.25rem] md:text-[3.25rem] leading-[1.05] font-bold tracking-tight text-gradient">
+              Welcome back, {firstName}
             </h1>
-            <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground max-w-xl">
-              Create and manage AI-assisted document generation projects from a single workspace.
+            <p className="mt-4 text-[15px] md:text-base leading-relaxed text-muted-foreground max-w-xl">
+              Create and manage AI-assisted document generation projects from a single workspace. Your documents, templates, and team are all here.
             </p>
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => setCreateOpen(true)}
+                className="h-10 inline-flex items-center gap-2 rounded-xl bg-gradient-brand text-white px-5 text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-brand/20"
+              >
+                <Plus className="h-4 w-4" /> New project
+              </button>
+              <Link
+                to="/templates"
+                className="h-10 inline-flex items-center gap-2 rounded-xl border border-border bg-surface-elevated/60 px-5 text-sm font-medium text-foreground hover:bg-accent hover:border-border-strong transition-colors"
+              >
+                <FileText className="h-4 w-4 text-muted-foreground" /> Browse templates
+              </Link>
+            </div>
           </div>
           <WelcomeIllustration />
         </div>
@@ -457,25 +473,44 @@ function DateCell({ v }: { v: string }) {
 
 function WelcomeIllustration() {
   return (
-    <svg viewBox="0 0 220 160" className="w-56 md:w-64 h-auto">
+    <svg viewBox="0 0 240 180" className="w-56 md:w-72 h-auto drop-shadow-2xl">
       <defs>
         <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="oklch(0.66 0.19 268)" />
-          <stop offset="1" stopColor="oklch(0.6 0.22 300)" />
+          <stop offset="0" stopColor="oklch(0.68 0.18 265)" />
+          <stop offset="1" stopColor="oklch(0.58 0.22 295)" />
         </linearGradient>
+        <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="oklch(0.3 0.03 270)" />
+          <stop offset="1" stopColor="oklch(0.22 0.02 270)" />
+        </linearGradient>
+        <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="6" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
       </defs>
-      <rect x="20" y="30" width="80" height="100" rx="6" fill="oklch(0.22 0.02 270)" stroke="oklch(0.34 0.025 270)" />
-      <rect x="30" y="45" width="60" height="4" rx="2" fill="url(#g1)" />
-      <rect x="30" y="55" width="50" height="3" rx="1.5" fill="oklch(0.35 0.02 270)" />
-      <rect x="30" y="62" width="55" height="3" rx="1.5" fill="oklch(0.35 0.02 270)" />
-      <rect x="30" y="69" width="45" height="3" rx="1.5" fill="oklch(0.35 0.02 270)" />
-      <circle cx="140" cy="60" r="18" fill="url(#g1)" opacity="0.9" />
-      <path d="M105 70 L125 65" stroke="url(#g1)" strokeWidth="2" markerEnd="url(#arrow)" />
-      <rect x="130" y="90" width="80" height="50" rx="6" fill="oklch(0.28 0.04 275)" stroke="url(#g1)" />
-      <rect x="140" y="100" width="60" height="3" rx="1.5" fill="url(#g1)" />
-      <rect x="140" y="108" width="55" height="3" rx="1.5" fill="oklch(0.5 0.02 270)" />
-      <rect x="140" y="116" width="50" height="3" rx="1.5" fill="oklch(0.5 0.02 270)" />
-      <rect x="140" y="124" width="45" height="3" rx="1.5" fill="oklch(0.5 0.02 270)" />
+      {/* Source document */}
+      <rect x="18" y="28" width="92" height="124" rx="10" fill="url(#g2)" stroke="oklch(0.38 0.03 270)" strokeWidth="1.5" />
+      <rect x="32" y="50" width="64" height="5" rx="2.5" fill="url(#g1)" />
+      <rect x="32" y="64" width="54" height="4" rx="2" fill="oklch(0.45 0.02 270)" />
+      <rect x="32" y="74" width="60" height="4" rx="2" fill="oklch(0.45 0.02 270)" />
+      <rect x="32" y="84" width="48" height="4" rx="2" fill="oklch(0.45 0.02 270)" />
+      <rect x="32" y="100" width="40" height="4" rx="2" fill="oklch(0.55 0.02 270)" />
+      <rect x="32" y="110" width="52" height="4" rx="2" fill="oklch(0.55 0.02 270)" />
+      {/* AI core */}
+      <circle cx="148" cy="66" r="26" fill="url(#g1)" opacity="0.95" filter="url(#softGlow)" />
+      <path d="M138 66 L146 74 L160 58" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.95" />
+      {/* Connection lines */}
+      <path d="M110 70 L122 66" stroke="url(#g1)" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M110 110 L122 86" stroke="url(#g1)" strokeWidth="2.5" strokeLinecap="round" opacity="0.6" />
+      {/* Generated document */}
+      <rect x="126" y="98" width="96" height="56" rx="10" fill="oklch(0.28 0.04 275)" stroke="oklch(0.42 0.04 275)" strokeWidth="1.5" />
+      <rect x="140" y="112" width="68" height="4" rx="2" fill="url(#g1)" />
+      <rect x="140" y="122" width="60" height="3" rx="1.5" fill="oklch(0.55 0.02 270)" />
+      <rect x="140" y="130" width="54" height="3" rx="1.5" fill="oklch(0.55 0.02 270)" />
+      <rect x="140" y="138" width="44" height="3" rx="1.5" fill="oklch(0.55 0.02 270)" />
+      {/* Floating sparkles */}
+      <circle cx="196" cy="44" r="4" fill="url(#g1)" opacity="0.8" />
+      <circle cx="48" cy="158" r="3" fill="oklch(0.6 0.15 290)" opacity="0.6" />
     </svg>
   );
 }
