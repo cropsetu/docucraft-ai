@@ -149,25 +149,35 @@ function Dashboard() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: DUR.reveal, ease: EASE.out }}
-        className="relative overflow-hidden rounded-3xl bg-surface p-8 md:p-10 elev-1 border border-border/60"
+        className="relative overflow-hidden rounded-3xl min-h-[260px] md:min-h-[300px] elev-1 border border-border/60"
       >
-        <div className="absolute inset-0 bg-hero-orbs opacity-80 pointer-events-none" />
-        <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-brand/10 blur-[80px] pointer-events-none" />
-        <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-run-success/10 blur-[70px] pointer-events-none" />
-        <div className="relative grid md:grid-cols-[1fr_auto] gap-8 items-center">
+        {/* Background image */}
+        <img
+          src={aiDocumentHero}
+          alt=""
+          width={1024}
+          height={768}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        {/* Readability scrims */}
+        <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/85 to-surface/30 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-surface/80 via-transparent to-surface/20 pointer-events-none" />
+        <div className="absolute inset-0 bg-hero-orbs opacity-40 pointer-events-none" />
+
+        {/* Content */}
+        <div className="relative z-10 flex flex-col justify-center h-full p-8 md:p-10">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-surface-elevated/70 px-3 py-1.5 text-[11px] font-mono uppercase tracking-[0.12em] text-muted-foreground backdrop-blur-sm">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/20 px-3 py-1.5 text-[11px] font-mono uppercase tracking-[0.12em] text-white/90 backdrop-blur-md">
               <span className="inline-block h-2 w-2 rounded-full bg-brand ai-pulse-uncertain" />
               Workspace
             </div>
-            <h1 className="mt-4 text-[2.25rem] md:text-[3.25rem] leading-[1.05] font-bold tracking-tight text-gradient">
+            <h1 className="mt-4 text-[2.25rem] md:text-[3.25rem] leading-[1.05] font-bold tracking-tight text-white drop-shadow-sm">
               Welcome back, {firstName}
             </h1>
-            <p className="mt-4 text-[15px] md:text-base leading-relaxed text-muted-foreground max-w-xl">
+            <p className="mt-4 text-[15px] md:text-base leading-relaxed text-white/80 max-w-xl drop-shadow-sm">
               Create and manage AI-assisted document generation projects from a single workspace. Your documents, templates, and team are all here.
             </p>
           </div>
-          <WelcomeIllustration />
         </div>
       </motion.div>
 
@@ -458,21 +468,6 @@ function DateCell({ v }: { v: string }) {
   );
 }
 
-function WelcomeIllustration() {
-  return (
-    <div className="relative hidden md:block w-64 lg:w-80 h-44 lg:h-52 rounded-2xl overflow-hidden border border-border/60 elev-1 shrink-0">
-      <img
-        src={aiDocumentHero}
-        alt="AI document processing"
-        width={1024}
-        height={768}
-        className="absolute inset-0 h-full w-full object-cover"
-      />
-      <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-surface/90" />
-      <div className="absolute inset-0 bg-gradient-to-t from-surface/70 via-transparent to-transparent" />
-    </div>
-  );
-}
 
 function FilterSelect({
   label,
