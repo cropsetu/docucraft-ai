@@ -87,7 +87,46 @@ type StageKey = typeof STAGES[number]["key"];
 
 function ProjectDetail() {
   const { id } = Route.useParams();
-  const project = useStore((s) => s.projects.find((p) => p.id === id))!;
+  const router = useRouter();
+  const maybeProject = useStore((s) => s.projects.find((p) => p.id === id));
+  const [retrying, setRetrying] = useState(false);
+
+  const retryLoad = async () => {
+    setRetrying(true);
+    try {
+      await router.invalidate();
+    } finally {
+      setRetrying(false);
+    }
+  };
+
+  if (!maybeProject) {
+    return (
+      <div className="p-6 md:p-8 max-w-3xl mx-auto">
+        <ErrorBanner
+          title="Couldn't load this project"
+          message="The project record wasn't available for this workspace. Try loading it again."
+          detail={`Project ${id}`}
+          onRetry={retryLoad}
+          retrying={retrying}
+        />
+      </div>
+    );
+  }
+
+  return <ProjectStages project={maybeProject} onRetry={retryLoad} retrying={retrying} />;
+}
+
+function ProjectStages({
+  project,
+  onRetry,
+  retrying,
+}: {
+  project: Project;
+  onRetry: () => void;
+  retrying: boolean;
+}) {
+
 
   const done: Record<StageKey, boolean> = {
     template: project.templates.length > 0,
