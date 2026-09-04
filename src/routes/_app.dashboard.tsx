@@ -165,20 +165,6 @@ function Dashboard() {
             <p className="mt-4 text-[15px] md:text-base leading-relaxed text-muted-foreground max-w-xl">
               Create and manage AI-assisted document generation projects from a single workspace. Your documents, templates, and team are all here.
             </p>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <button
-                onClick={() => setCreateOpen(true)}
-                className="h-10 inline-flex items-center gap-2 rounded-xl bg-gradient-brand text-white px-5 text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-brand/20"
-              >
-                <Plus className="h-4 w-4" /> New project
-              </button>
-              <Link
-                to="/templates"
-                className="h-10 inline-flex items-center gap-2 rounded-xl border border-border bg-surface-elevated/60 px-5 text-sm font-medium text-foreground hover:bg-accent hover:border-border-strong transition-colors"
-              >
-                <FileText className="h-4 w-4 text-muted-foreground" /> Browse templates
-              </Link>
-            </div>
           </div>
           <WelcomeIllustration />
         </div>
