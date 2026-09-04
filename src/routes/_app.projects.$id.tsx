@@ -740,13 +740,19 @@ function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center py-6 text-center">
-      <div className="mb-4">{illustration}</div>
-      <div className="font-semibold">{title}</div>
-      <div className="text-sm text-muted-foreground max-w-sm mt-1">{subtitle}</div>
-      {action && <div className="mt-5">{action}</div>}
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: DUR.reveal, ease: EASE.out }}
+      className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/80 bg-surface-elevated/30 px-6 py-10 text-center"
+    >
+      <div className="mb-5">{illustration}</div>
+      <div className="text-base font-semibold tracking-tight">{title}</div>
+      <div className="text-sm leading-relaxed text-muted-foreground max-w-sm mt-1.5">{subtitle}</div>
+      {action && <div className="mt-6">{action}</div>}
+    </motion.div>
   );
+
 }
 
 function UploadDialog({
