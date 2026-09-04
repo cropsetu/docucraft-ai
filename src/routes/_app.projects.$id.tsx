@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate, notFound } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -39,6 +39,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { listContainer, listItem, useCountUp, DUR, EASE, SPRING, staggerDelay } from "@/lib/motion";
+import { StageSkeleton } from "@/components/skeletons";
 
 export const Route = createFileRoute("/_app/projects/$id")({
   head: ({ params }) => ({
@@ -85,6 +86,13 @@ function ProjectDetail() {
   const completedCount = Object.values(done).filter(Boolean).length;
   const progressPct = (completedCount / STAGES.length) * 100;
   const stageCountUp = useCountUp(completedCount, 600);
+
+  // Stage body shows placeholders until the panel has painted once.
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
