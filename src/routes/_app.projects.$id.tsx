@@ -1,5 +1,5 @@
-import { createFileRoute, Link, useNavigate, notFound } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { createFileRoute, Link, useNavigate, notFound, useRouter } from "@tanstack/react-router";
+import React, { useState, useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -40,6 +40,8 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { listContainer, listItem, useCountUp, DUR, EASE, SPRING, staggerDelay } from "@/lib/motion";
 import { StageSkeleton } from "@/components/skeletons";
+import { ErrorBanner } from "@/components/error-banner";
+import type { Project } from "@/lib/types";
 
 export const Route = createFileRoute("/_app/projects/$id")({
   head: ({ params }) => ({
@@ -53,8 +55,27 @@ export const Route = createFileRoute("/_app/projects/$id")({
     if (!proj) throw notFound();
     return null;
   },
+  errorComponent: ({ error, reset }) => (
+    <div className="p-6 md:p-8 max-w-3xl mx-auto">
+      <ErrorBanner
+        title="Couldn't load this project"
+        message="The project details didn't come back. Nothing was lost — try loading it again."
+        detail={error instanceof Error ? error.message : String(error)}
+        onRetry={reset}
+      />
+    </div>
+  ),
+  notFoundComponent: () => (
+    <div className="p-6 md:p-8 max-w-3xl mx-auto">
+      <ErrorBanner
+        title="Project not found"
+        message="This project no longer exists in your workspace."
+      />
+    </div>
+  ),
   component: ProjectDetail,
 });
+
 
 const STAGES = [
   { key: "template", n: 1, title: "Template", short: "Blueprint", icon: UploadCloud, hint: "Define the document structure" },
@@ -68,7 +89,46 @@ type StageKey = typeof STAGES[number]["key"];
 
 function ProjectDetail() {
   const { id } = Route.useParams();
-  const project = useStore((s) => s.projects.find((p) => p.id === id))!;
+  const router = useRouter();
+  const maybeProject = useStore((s) => s.projects.find((p) => p.id === id));
+  const [retrying, setRetrying] = useState(false);
+
+  const retryLoad = async () => {
+    setRetrying(true);
+    try {
+      await router.invalidate();
+    } finally {
+      setRetrying(false);
+    }
+  };
+
+  if (!maybeProject) {
+    return (
+      <div className="p-6 md:p-8 max-w-3xl mx-auto">
+        <ErrorBanner
+          title="Couldn't load this project"
+          message="The project record wasn't available for this workspace. Try loading it again."
+          detail={`Project ${id}`}
+          onRetry={retryLoad}
+          retrying={retrying}
+        />
+      </div>
+    );
+  }
+
+  return <ProjectStages project={maybeProject} onRetry={retryLoad} retrying={retrying} />;
+}
+
+function ProjectStages({
+  project,
+  onRetry,
+  retrying,
+}: {
+  project: Project;
+  onRetry: () => void;
+  retrying: boolean;
+}) {
+
 
   const done: Record<StageKey, boolean> = {
     template: project.templates.length > 0,
@@ -191,22 +251,30 @@ function ProjectDetail() {
           {!ready ? (
             <StageSkeleton lines={3} />
           ) : (
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={active}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: DUR.base, ease: EASE.out }}
-              >
-                {active === "template" && <Step1Template project={project} />}
-                {active === "source" && <Step2Source project={project} />}
-                {active === "method" && <Step3Method project={project} />}
-                {active === "mapping" && <Step4Drafts project={project} />}
-                {active === "drafts" && <Step5Generated project={project} />}
-              </motion.div>
-            </AnimatePresence>
+            <StageErrorBoundary
+              stageKey={active}
+              stageTitle={activeStage.title}
+              onRetry={onRetry}
+              retrying={retrying}
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={active}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: DUR.base, ease: EASE.out }}
+                >
+                  {active === "template" && <Step1Template project={project} />}
+                  {active === "source" && <Step2Source project={project} />}
+                  {active === "method" && <Step3Method project={project} />}
+                  {active === "mapping" && <Step4Drafts project={project} />}
+                  {active === "drafts" && <Step5Generated project={project} />}
+                </motion.div>
+              </AnimatePresence>
+            </StageErrorBoundary>
           )}
+
         </div>
 
       </div>
@@ -872,4 +940,47 @@ function NetworkNodes() {
       <rect x="110" y="70" width="20" height="20" fill="oklch(0.5 0.05 275)" />
     </svg>
   );
+}
+
+interface StageErrorBoundaryProps {
+  stageKey: string;
+  stageTitle: string;
+  onRetry: () => void;
+  retrying: boolean;
+  children: React.ReactNode;
+}
+
+class StageErrorBoundary extends React.Component<
+  StageErrorBoundaryProps,
+  { error: Error | null }
+> {
+  state = { error: null as Error | null };
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  componentDidUpdate(prev: StageErrorBoundaryProps) {
+    if (prev.stageKey !== this.props.stageKey && this.state.error) {
+      this.setState({ error: null });
+    }
+  }
+
+  render() {
+    if (this.state.error) {
+      return (
+        <ErrorBanner
+          title={`Couldn't load the ${this.props.stageTitle} stage`}
+          message="This stage failed to load its data. Retry, or move to another stage and come back."
+          detail={this.state.error.message}
+          retrying={this.props.retrying}
+          onRetry={() => {
+            this.setState({ error: null });
+            this.props.onRetry();
+          }}
+        />
+      );
+    }
+    return this.props.children;
+  }
 }
