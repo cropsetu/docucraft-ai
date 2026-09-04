@@ -23,6 +23,9 @@ import { cn } from "@/lib/utils";
 import { useStore } from "@/lib/store";
 import { useTheme } from "@/lib/theme";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Atmosphere } from "@/components/atmosphere";
+import { CommandPalette } from "@/components/command-palette";
+import { ModelBoundaryChip } from "@/components/model-boundary-chip";
 
 const NAV = [
   { to: "/dashboard", label: "Projects", icon: FolderKanban },
@@ -55,7 +58,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [location.pathname]);
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
+    <div className="relative flex min-h-screen bg-background text-foreground">
+      <Atmosphere />
+      <CommandPalette />
       {/* Desktop sidebar */}
       <aside
         className={cn(
@@ -133,6 +138,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </kbd>
             </div>
           </div>
+          <ModelBoundaryChip />
           <button
             onClick={toggle}
             className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground"
