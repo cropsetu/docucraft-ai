@@ -149,29 +149,7 @@ function Dashboard() {
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8">
       {/* Welcome banner */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: DUR.reveal, ease: EASE.out }}
-        className="relative overflow-hidden rounded-2xl bg-surface p-8 md:p-10 elev-1"
-      >
-        <div className="absolute inset-0 bg-hero-orbs opacity-70 pointer-events-none" />
-        <div className="relative grid md:grid-cols-[1fr_auto] gap-8 items-center">
-          <div>
-            <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.14em] text-muted-foreground">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand ai-pulse-uncertain" />
-              Workspace
-            </div>
-            <h1 className="mt-2 text-[2rem] md:text-[2.75rem] leading-[1.08] font-bold tracking-tight text-gradient">
-              Welcome, {firstName}
-            </h1>
-            <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground max-w-xl">
-              Create and manage AI-assisted document generation projects from a single workspace.
-            </p>
-          </div>
-          <WelcomeIllustration />
-        </div>
-      </motion.div>
+      <WelcomeBanner user={currentUser} projects={projects} onCreate={() => setCreateOpen(true)} />
 
       {/* Content studio */}
       <div>
