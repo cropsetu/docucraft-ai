@@ -468,21 +468,6 @@ function DateCell({ v }: { v: string }) {
   );
 }
 
-function WelcomeIllustration() {
-  return (
-    <div className="relative hidden md:block w-64 lg:w-80 h-44 lg:h-52 rounded-2xl overflow-hidden border border-border/60 elev-1 shrink-0">
-      <img
-        src={aiDocumentHero}
-        alt="AI document processing"
-        width={1024}
-        height={768}
-        className="absolute inset-0 h-full w-full object-cover"
-      />
-      <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-surface/90" />
-      <div className="absolute inset-0 bg-gradient-to-t from-surface/70 via-transparent to-transparent" />
-    </div>
-  );
-}
 
 function FilterSelect({
   label,
