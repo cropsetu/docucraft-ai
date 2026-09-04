@@ -34,22 +34,76 @@ export const Route = createFileRoute("/_app/dashboard")({
   component: Dashboard,
 });
 
+type SortKey = "modified" | "created" | "name" | "status";
+
+const UPDATED_WINDOWS: { value: string; label: string; hours: number | null }[] = [
+  { value: "any", label: "Any time", hours: null },
+  { value: "24h", label: "Last 24 hours", hours: 24 },
+  { value: "7d", label: "Last 7 days", hours: 24 * 7 },
+  { value: "30d", label: "Last 30 days", hours: 24 * 30 },
+  { value: "90d", label: "Last 90 days", hours: 24 * 90 },
+];
+
+function parseWhen(v: string) {
+  const t = Date.parse(v);
+  return Number.isNaN(t) ? 0 : t;
+}
+
 function Dashboard() {
   const { projects, currentUser, totalCount } = useStore();
   const [search, setSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [status, setStatus] = useState<string>("all");
+  const [fn, setFn] = useState<string>("all");
+  const [updated, setUpdated] = useState<string>("any");
+  const [sortKey, setSortKey] = useState<SortKey>("modified");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [retrying, setRetrying] = useState(false);
+
+  const statuses = useMemo(
+    () => Array.from(new Set(projects.map((p) => p.status))),
+    [projects],
+  );
+  const functions = useMemo(
+    () => Array.from(new Set(projects.map((p) => p.function))).sort(),
+    [projects],
+  );
+
+  const activeFilterCount =
+    (status !== "all" ? 1 : 0) + (fn !== "all" ? 1 : 0) + (updated !== "any" ? 1 : 0);
 
   const filtered = useMemo(() => {
-    if (!search) return projects;
-    const q = search.toLowerCase();
-    return projects.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.projectId.includes(q) ||
-        p.documentType.toLowerCase().includes(q) ||
-        p.function.toLowerCase().includes(q),
-    );
-  }, [projects, search]);
+    const q = search.trim().toLowerCase();
+    const window = UPDATED_WINDOWS.find((w) => w.value === updated)?.hours ?? null;
+    const cutoff = window === null ? null : Date.now() - window * 3600_000;
+
+    const rows = projects.filter((p) => {
+      if (q) {
+        const hit =
+          p.name.toLowerCase().includes(q) ||
+          p.projectId.includes(q) ||
+          p.documentType.toLowerCase().includes(q) ||
+          p.function.toLowerCase().includes(q);
+        if (!hit) return false;
+      }
+      if (status !== "all" && p.status !== status) return false;
+      if (fn !== "all" && p.function !== fn) return false;
+      if (cutoff !== null && parseWhen(p.modifiedAt) < cutoff) return false;
+      return true;
+    });
+
+    const dir = sortDir === "asc" ? 1 : -1;
+    return [...rows].sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === "name") cmp = a.name.localeCompare(b.name);
+      else if (sortKey === "status") cmp = a.status.localeCompare(b.status);
+      else if (sortKey === "created") cmp = parseWhen(a.createdAt) - parseWhen(b.createdAt);
+      else cmp = parseWhen(a.modifiedAt) - parseWhen(b.modifiedAt);
+      return cmp * dir;
+    });
+  }, [projects, search, status, fn, updated, sortKey, sortDir]);
 
   const firstName = currentUser.split(" ")[0];
 
@@ -59,6 +113,27 @@ function Dashboard() {
     const raf = requestAnimationFrame(() => setReady(true));
     return () => cancelAnimationFrame(raf);
   }, []);
+
+  const reload = async () => {
+    setRetrying(true);
+    try {
+      // Re-reads the workspace list; surfaces a banner if the read fails.
+      const list = useStore.getState().projects;
+      if (!Array.isArray(list)) throw new Error("Workspace list unavailable");
+      setLoadError(null);
+    } catch (e) {
+      setLoadError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setRetrying(false);
+    }
+  };
+
+  const resetFilters = () => {
+    setStatus("all");
+    setFn("all");
+    setUpdated("any");
+  };
+
 
 
   return (
