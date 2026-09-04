@@ -30,7 +30,7 @@ import {
   Lock,
   Unlock,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,7 +38,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { listContainer, listItem, useCountUp } from "@/lib/motion";
+import { listContainer, listItem, useCountUp, DUR, EASE, SPRING, staggerDelay } from "@/lib/motion";
 
 export const Route = createFileRoute("/_app/projects/$id")({
   head: ({ params }) => ({
@@ -84,6 +84,7 @@ function ProjectDetail() {
   const activeStage = STAGES[activeIdx];
   const completedCount = Object.values(done).filter(Boolean).length;
   const progressPct = (completedCount / STAGES.length) * 100;
+  const stageCountUp = useCountUp(completedCount, 600);
 
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
@@ -95,11 +96,16 @@ function ProjectDetail() {
       </div>
 
       {/* Title + meta strip */}
-      <div className="rounded-2xl border border-border bg-surface overflow-hidden">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: DUR.reveal, ease: EASE.out }}
+        className="rounded-2xl border border-border bg-surface overflow-hidden elev-1"
+      >
         <div className="p-6 flex items-start justify-between gap-4 flex-wrap">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand" />
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand ai-pulse-uncertain" />
               {project.projectId} · {project.region} · {project.function}
             </div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight mt-1.5">{project.name}</h1>
@@ -110,34 +116,47 @@ function ProjectDetail() {
           <div className="flex items-center gap-2 shrink-0">
             <div className="text-right pr-3 border-r border-border">
               <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Progress</div>
-              <div className="text-sm font-semibold">{completedCount}/{STAGES.length} stages</div>
+              <div className="text-sm font-semibold tabular-nums">
+                {Math.round(stageCountUp)}/{STAGES.length} stages
+              </div>
             </div>
-            <button className="h-9 px-3 rounded-lg border border-border bg-surface hover:bg-accent text-sm inline-flex items-center gap-1.5">
+            <button className="h-9 px-3 rounded-lg border border-border bg-surface hover:bg-accent text-sm inline-flex items-center gap-1.5 transition-colors">
               <Share2 className="h-4 w-4" /> Share
             </button>
-            <button className="h-9 w-9 rounded-lg border border-border bg-surface hover:bg-accent flex items-center justify-center">
+            <button className="h-9 w-9 rounded-lg border border-border bg-surface hover:bg-accent flex items-center justify-center transition-colors">
               <MoreVertical className="h-4 w-4" />
             </button>
           </div>
         </div>
         {/* Progress bar */}
         <div className="h-1 bg-muted">
-          <div className="h-full bg-gradient-brand transition-all" style={{ width: `${progressPct}%` }} />
+          <motion.div
+            className="h-full bg-gradient-brand"
+            initial={{ width: 0 }}
+            animate={{ width: `${progressPct}%` }}
+            transition={SPRING.progress}
+          />
         </div>
-      </div>
+      </motion.div>
 
       {/* Pipeline rail */}
       <PipelineRail stages={STAGES} done={done} active={active} onSelect={setActive} />
 
       {/* Active stage panel */}
-      <div className="rounded-2xl border border-border bg-surface">
+      <div className="rounded-2xl border border-border bg-surface elev-1">
         <div className="flex items-center gap-4 p-6 border-b border-border">
-          <div className={cn(
-            "h-11 w-11 rounded-xl flex items-center justify-center border",
-            done[active] ? "bg-success/10 text-success border-success/30" : "bg-brand/10 text-brand border-brand/30",
-          )}>
+          <motion.div
+            key={active}
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={SPRING.ui}
+            className={cn(
+              "h-11 w-11 rounded-xl flex items-center justify-center border",
+              done[active] ? "bg-success/10 text-success border-success/30" : "bg-brand/10 text-brand border-brand/30",
+            )}
+          >
             <activeStage.icon className="h-5 w-5" />
-          </div>
+          </motion.div>
           <div className="flex-1 min-w-0">
             <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-mono">Stage {activeStage.n} of {STAGES.length}</div>
             <div className="text-lg font-semibold">{activeStage.title}</div>
@@ -147,7 +166,7 @@ function ProjectDetail() {
             <button
               disabled={activeIdx === 0}
               onClick={() => setActive(STAGES[activeIdx - 1].key)}
-              className="h-9 px-3 rounded-lg border border-border hover:bg-accent text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+              className="h-9 px-3 rounded-lg border border-border hover:bg-accent text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               Previous
             </button>
@@ -161,11 +180,21 @@ function ProjectDetail() {
           </div>
         </div>
         <div className="p-6">
-          {active === "template" && <Step1Template project={project} />}
-          {active === "source" && <Step2Source project={project} />}
-          {active === "method" && <Step3Method project={project} />}
-          {active === "mapping" && <Step4Drafts project={project} />}
-          {active === "drafts" && <Step5Generated project={project} />}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={active}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: DUR.base, ease: EASE.out }}
+            >
+              {active === "template" && <Step1Template project={project} />}
+              {active === "source" && <Step2Source project={project} />}
+              {active === "method" && <Step3Method project={project} />}
+              {active === "mapping" && <Step4Drafts project={project} />}
+              {active === "drafts" && <Step5Generated project={project} />}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </div>
@@ -184,34 +213,60 @@ function PipelineRail({
   onSelect: (k: StageKey) => void;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-surface p-4">
+    <div className="rounded-2xl border border-border bg-surface p-4 elev-1">
       <div className="grid grid-cols-5 gap-3 relative">
         {stages.map((s, i) => {
           const isActive = active === s.key;
           const isDone = done[s.key];
+          const linkLit = done[stages[i + 1]?.key as StageKey] || isDone;
           return (
-            <div key={s.key} className="relative">
+            <motion.div
+              key={s.key}
+              className="relative"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: DUR.reveal, ease: EASE.out, delay: staggerDelay(i, 0.05) }}
+            >
               {/* Connector line */}
               {i < stages.length - 1 && (
-                <div className={cn(
-                  "hidden md:block absolute top-5 left-[calc(50%+22px)] right-[-12px] h-px",
-                  done[stages[i + 1].key] || (isDone && !done[stages[i + 1].key]) ? "bg-brand/60" : "bg-border",
-                )} />
+                <div className="hidden md:block absolute top-5 left-[calc(50%+22px)] right-[-12px] h-px bg-border overflow-hidden">
+                  <motion.div
+                    className="h-px bg-brand/70 origin-left"
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: linkLit ? 1 : 0 }}
+                    transition={{ duration: DUR.revealSlow, ease: EASE.out, delay: staggerDelay(i, 0.06) }}
+                    style={{ width: "100%" }}
+                  />
+                </div>
               )}
               <button
                 onClick={() => onSelect(s.key)}
                 className="w-full flex flex-col items-center text-center gap-2 group"
               >
-                <div className={cn(
-                  "h-10 w-10 rounded-full flex items-center justify-center border-2 font-mono text-sm font-semibold transition-all relative z-10",
-                  isActive
-                    ? "bg-gradient-brand text-white border-transparent shadow-lg shadow-brand/30 scale-110"
-                    : isDone
-                    ? "bg-success/10 text-success border-success/40"
-                    : "bg-background text-muted-foreground border-border group-hover:border-border-strong group-hover:text-foreground",
-                )}>
-                  {isDone && !isActive ? <Check className="h-4 w-4" /> : s.n}
-                </div>
+                <span className="relative flex items-center justify-center">
+                  {isActive && (
+                    <motion.span
+                      layoutId="stage-halo"
+                      className="absolute inset-[-6px] rounded-full bg-brand/15"
+                      transition={SPRING.ui}
+                    />
+                  )}
+                  <motion.span
+                    whileHover={{ scale: 1.06 }}
+                    whileTap={{ scale: 0.96 }}
+                    transition={SPRING.ui}
+                    className={cn(
+                      "h-10 w-10 rounded-full flex items-center justify-center border-2 font-mono text-sm font-semibold relative z-10",
+                      isActive
+                        ? "bg-gradient-brand text-white border-transparent shadow-lg shadow-brand/30"
+                        : isDone
+                        ? "bg-success/10 text-success border-success/40"
+                        : "bg-background text-muted-foreground border-border group-hover:border-border-strong group-hover:text-foreground",
+                    )}
+                  >
+                    {isDone && !isActive ? <Check className="h-4 w-4" /> : s.n}
+                  </motion.span>
+                </span>
                 <div className="min-w-0">
                   <div className={cn(
                     "text-sm font-semibold truncate",
@@ -222,13 +277,14 @@ function PipelineRail({
                   </div>
                 </div>
               </button>
-            </div>
+            </motion.div>
           );
         })}
       </div>
     </div>
   );
 }
+
 
 /* Compatibility shim: renders children only (header lives in the stage panel now). */
 function StepCard({ children }: { n?: number; title?: string; count?: number; description?: string; icon?: any; iconColor?: string; status?: string; defaultOpen?: boolean; children: React.ReactNode }) {
