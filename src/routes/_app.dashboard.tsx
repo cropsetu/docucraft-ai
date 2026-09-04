@@ -115,7 +115,7 @@ function Dashboard() {
     });
   }, [projects, search, status, fn, updated, sortKey, sortDir]);
 
-  const firstName = currentUser.split(" ")[0];
+  
 
   // Placeholder rows show until the workspace list has painted once.
   const [ready, setReady] = useState(false);
