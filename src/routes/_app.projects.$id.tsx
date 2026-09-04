@@ -251,22 +251,30 @@ function ProjectStages({
           {!ready ? (
             <StageSkeleton lines={3} />
           ) : (
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={active}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: DUR.base, ease: EASE.out }}
-              >
-                {active === "template" && <Step1Template project={project} />}
-                {active === "source" && <Step2Source project={project} />}
-                {active === "method" && <Step3Method project={project} />}
-                {active === "mapping" && <Step4Drafts project={project} />}
-                {active === "drafts" && <Step5Generated project={project} />}
-              </motion.div>
-            </AnimatePresence>
+            <StageErrorBoundary
+              stageKey={active}
+              stageTitle={activeStage.title}
+              onRetry={onRetry}
+              retrying={retrying}
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={active}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: DUR.base, ease: EASE.out }}
+                >
+                  {active === "template" && <Step1Template project={project} />}
+                  {active === "source" && <Step2Source project={project} />}
+                  {active === "method" && <Step3Method project={project} />}
+                  {active === "mapping" && <Step4Drafts project={project} />}
+                  {active === "drafts" && <Step5Generated project={project} />}
+                </motion.div>
+              </AnimatePresence>
+            </StageErrorBoundary>
           )}
+
         </div>
 
       </div>
