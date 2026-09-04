@@ -479,3 +479,67 @@ function WelcomeIllustration() {
     </svg>
   );
 }
+
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+}) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-9 min-w-[9.5rem] rounded-lg border border-border bg-surface px-2.5 text-[13px] text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring/50"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function SortableTh({
+  label,
+  k,
+  sortKey,
+  sortDir,
+  onSort,
+}: {
+  label: string;
+  k: SortKey;
+  sortKey: SortKey;
+  sortDir: "asc" | "desc";
+  onSort: (k: SortKey) => void;
+}) {
+  const active = sortKey === k;
+  return (
+    <th className="px-4 py-3.5 font-semibold whitespace-nowrap">
+      <button
+        onClick={() => onSort(k)}
+        className={cn(
+          "inline-flex items-center gap-1 uppercase tracking-[0.12em] transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+          active ? "text-foreground" : "hover:text-foreground",
+        )}
+        aria-sort={active ? (sortDir === "asc" ? "ascending" : "descending") : "none"}
+      >
+        {label}
+        {active ? (
+          sortDir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
+        ) : (
+          <ChevronsUpDown className="h-3 w-3 opacity-40" />
+        )}
+      </button>
+    </th>
+  );
+}
